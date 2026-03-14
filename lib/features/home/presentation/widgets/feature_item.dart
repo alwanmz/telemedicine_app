@@ -1,38 +1,71 @@
 import 'package:flutter/material.dart';
-import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_text_styles.dart';
 
 class FeatureItem extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color iconBg;
+  final Color iconColor;
+  final bool showBadge;
 
-  const FeatureItem({super.key, required this.icon, required this.label});
+  const FeatureItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.iconBg,
+    required this.iconColor,
+    this.showBadge = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          width: 58,
-          height: 58,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                color: iconBg,
+                borderRadius: BorderRadius.circular(20),
               ),
-            ],
-          ),
-          child: Icon(icon, color: AppColors.primary, size: 28),
+              child: Icon(icon, color: iconColor, size: 30),
+            ),
+            if (showBadge)
+              Positioned(
+                top: -4,
+                right: -4,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFF5A7A),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Baru',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
         const SizedBox(height: 8),
         Text(
           label,
-          style: AppTextStyles.bodySmall,
+          style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
