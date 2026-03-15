@@ -71,3 +71,26 @@ Implement segmented status filters on the Janji Temu page with these tabs:
 - Keep existing navigation to appointment detail
 - Show appropriate empty state when a selected tab has no items
 - Do not break booking flow
+
+## New Goal
+
+Enhance the Janji Temu status segmented tabs by adding counters:
+
+- Semua (count)
+- Terjadwal (count)
+- Dijadwalkan Ulang (count)
+- Dibatalkan (count)
+
+## Counter Rules
+
+- Semua shows total number of appointments
+- Terjadwal shows only appointments with status "Terjadwal"
+- Dijadwalkan Ulang shows only appointments with status "Dijadwalkan Ulang"
+- Dibatalkan shows only appointments with status "Dibatalkan"
+
+## UI Rules
+
+- Keep current segmented tab style
+- Counter should be compact and visually secondary but still readable
+- Do not make the tabs feel crowded
+- Preserve current filtering behavior

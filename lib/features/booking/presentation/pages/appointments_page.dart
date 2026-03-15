@@ -24,6 +24,18 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
   @override
   Widget build(BuildContext context) {
     final appointments = ref.watch(appointmentsProvider);
+    final filterCounts = <String, int>{
+      'Semua': appointments.length,
+      'Terjadwal': appointments
+          .where((item) => item['status'] == 'Terjadwal')
+          .length,
+      'Dijadwalkan Ulang': appointments
+          .where((item) => item['status'] == 'Dijadwalkan Ulang')
+          .length,
+      'Dibatalkan': appointments
+          .where((item) => item['status'] == 'Dibatalkan')
+          .length,
+    };
     final filteredAppointments = appointments.where((item) {
       if (_selectedFilter == 'Semua') return true;
       return item['status'] == _selectedFilter;
@@ -70,15 +82,47 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                   : const Color(0xFFE5E7EB),
                             ),
                           ),
-                          child: Text(
-                            filter,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF4B5563),
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                filter,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : const Color(0xFF4B5563),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                constraints: const BoxConstraints(
+                                  minWidth: 22,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.white.withValues(alpha: 0.18)
+                                      : const Color(0xFFEFF4FF),
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  '${filterCounts[filter] ?? 0}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF2F80ED),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );
@@ -91,7 +135,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                       : ListView.separated(
                           padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                           itemCount: filteredAppointments.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 14),
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 14),
                           itemBuilder: (context, index) {
                             final item = filteredAppointments[index];
 
@@ -143,7 +188,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            item['doctorName'] as String? ?? '-',
+                                            item['doctorName'] as String? ??
+                                                '-',
                                             style: const TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
