@@ -11,6 +11,7 @@ import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../shared/presentation/pages/main_shell_page.dart';
+import '../../features/booking/presentation/pages/appointments_page.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/splash',
@@ -50,6 +51,10 @@ final GoRouter appRouter = GoRouter(
         return AppointmentDetailPage(appointment: appointment);
       },
     ),
+    GoRoute(
+      path: '/doctor-detail-list',
+      builder: (context, state) => const DoctorsPage(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShellPage(navigationShell: navigationShell);
@@ -67,7 +72,7 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/appointments',
-              builder: (context, state) => const DoctorsPage(),
+              builder: (context, state) => const AppointmentsPage(),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_text_styles.dart';
 import 'feature_item.dart';
 
@@ -47,11 +48,14 @@ class FeatureGrid extends StatelessWidget {
         iconBg: Color(0xFFEAF4FF),
         iconColor: Color(0xFF2F80ED),
       ),
-      const FeatureItem(
+      FeatureItem(
         icon: Icons.chat_bubble_outline_rounded,
-        label: 'Teledokter',
-        iconBg: Color(0xFFE9FBF6),
-        iconColor: Color(0xFF20B486),
+        label: 'Jadwal Dokter',
+        iconBg: const Color(0xFFE9FBF6),
+        iconColor: const Color(0xFF20B486),
+        onTap: () {
+          context.push('/doctor-detail-list');
+        },
       ),
       const FeatureItem(
         icon: Icons.grid_view_rounded,

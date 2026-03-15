@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../providers/appointment_provider.dart';
 
-class BookingPage extends StatefulWidget {
+class BookingPage extends ConsumerStatefulWidget {
   final Map<String, dynamic> doctor;
 
   const BookingPage({super.key, required this.doctor});
 
   @override
-  State<BookingPage> createState() => _BookingPageState();
+  ConsumerState<BookingPage> createState() => _BookingPageState();
 }
 
-class _BookingPageState extends State<BookingPage> {
+class _BookingPageState extends ConsumerState<BookingPage> {
   String selectedDate = 'Senin, 18 Maret 2026';
   String selectedTime = '09:00';
   String selectedConsultationType = 'Chat';
@@ -50,6 +52,7 @@ class _BookingPageState extends State<BookingPage> {
             child: ElevatedButton(
               onPressed: () {
                 final appointment = {
+                  'id': DateTime.now().millisecondsSinceEpoch.toString(),
                   'doctorName': doctorName,
                   'specialization': specialization,
                   'hospital': hospitalName,
@@ -60,6 +63,10 @@ class _BookingPageState extends State<BookingPage> {
                   'totalPrice': 'Rp 80.000',
                   'status': 'Terjadwal',
                 };
+
+                ref
+                    .read(appointmentsProvider.notifier)
+                    .addAppointment(appointment);
 
                 context.push('/booking-success', extra: appointment);
               },

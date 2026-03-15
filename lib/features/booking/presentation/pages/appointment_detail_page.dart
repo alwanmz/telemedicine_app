@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../providers/appointment_provider.dart';
 
-class AppointmentDetailPage extends StatelessWidget {
+class AppointmentDetailPage extends ConsumerWidget {
   final Map<String, dynamic> appointment;
 
   const AppointmentDetailPage({super.key, required this.appointment});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final id = appointment['id'] as String? ?? '';
     final doctorName = appointment['doctorName'] as String? ?? '-';
     final specialization = appointment['specialization'] as String? ?? '-';
     final hospitalName = appointment['hospital'] as String? ?? '-';
@@ -18,8 +20,130 @@ class AppointmentDetailPage extends StatelessWidget {
     final totalPrice = appointment['totalPrice'] as String? ?? 'Rp 80.000';
     final status = appointment['status'] as String? ?? 'Terjadwal';
 
+    final isCancelled = status == 'Dibatalkan';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Janji'), centerTitle: false),
+      bottomNavigationBar: isCancelled
+          ? null
+          : SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          final result =
+                              await showModalBottomSheet<Map<String, String>>(
+                                context: context,
+                                backgroundColor: Colors.white,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(28),
+                                  ),
+                                ),
+                                builder: (context) => const _RescheduleSheet(),
+                              );
+
+                          if (result != null) {
+                            ref
+                                .read(appointmentsProvider.notifier)
+                                .rescheduleAppointment(
+                                  id: id,
+                                  newDate: result['date']!,
+                                  newTime: result['time']!,
+                                );
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Jadwal berhasil diubah'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2F80ED),
+                          side: const BorderSide(color: Color(0xFFE5E7EB)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          minimumSize: const Size.fromHeight(54),
+                        ),
+                        child: const Text(
+                          'Jadwal Ulang',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final confirmed = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              title: const Text('Batalkan Janji'),
+                              content: const Text(
+                                'Yakin ingin membatalkan janji ini?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('Tidak'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.redAccent,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Ya, Batalkan'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (confirmed == true) {
+                            ref
+                                .read(appointmentsProvider.notifier)
+                                .cancelAppointment(id);
+
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Janji berhasil dibatalkan'),
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          minimumSize: const Size.fromHeight(54),
+                        ),
+                        child: const Text(
+                          'Batalkan',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
@@ -91,7 +215,7 @@ class AppointmentDetailPage extends StatelessWidget {
               _DetailRow(
                 label: 'Status',
                 value: status,
-                valueColor: const Color(0xFF20B486),
+                valueColor: _statusColor(status),
               ),
             ],
           ),
@@ -120,6 +244,12 @@ class AppointmentDetailPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    if (status == 'Dibatalkan') return const Color(0xFFDC2626);
+    if (status == 'Dijadwalkan Ulang') return const Color(0xFFEA580C);
+    return const Color(0xFF20B486);
   }
 }
 
@@ -190,6 +320,157 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _RescheduleSheet extends StatefulWidget {
+  const _RescheduleSheet();
+
+  @override
+  State<_RescheduleSheet> createState() => _RescheduleSheetState();
+}
+
+class _RescheduleSheetState extends State<_RescheduleSheet> {
+  String selectedDate = 'Selasa, 19 Maret 2026';
+  String selectedTime = '10:00';
+
+  final List<String> dates = const [
+    'Selasa, 19 Maret 2026',
+    'Rabu, 20 Maret 2026',
+    'Kamis, 21 Maret 2026',
+  ];
+
+  final List<String> times = const [
+    '09:00',
+    '10:00',
+    '11:00',
+    '13:00',
+    '14:00',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            'Jadwal Ulang',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: dates.map((date) {
+              final isSelected = selectedDate == date;
+              return _SheetChip(
+                label: date,
+                isSelected: isSelected,
+                onTap: () {
+                  setState(() {
+                    selectedDate = date;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: times.map((time) {
+              final isSelected = selectedTime == time;
+              return _SheetChip(
+                label: time,
+                isSelected: isSelected,
+                compact: true,
+                onTap: () {
+                  setState(() {
+                    selectedTime = time;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context, {
+                  'date': selectedDate,
+                  'time': selectedTime,
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2F80ED),
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              child: const Text(
+                'Simpan Jadwal Baru',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SheetChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool compact;
+
+  const _SheetChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    this.compact = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 14 : 16,
+          vertical: compact ? 10 : 12,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF2F80ED) : const Color(0xFFF9FAFB),
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF2F80ED)
+                : const Color(0xFFE5E7EB),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : const Color(0xFF374151),
+          ),
+        ),
       ),
     );
   }
