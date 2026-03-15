@@ -32,7 +32,7 @@ class MainShellPage extends StatelessWidget {
           NavigationDestination(
             icon: Icon(Icons.calendar_month_outlined),
             selectedIcon: Icon(Icons.calendar_month_rounded),
-            label: 'Janji',
+            label: 'Dokter',
           ),
           NavigationDestination(
             icon: Icon(Icons.chat_bubble_outline_rounded),
