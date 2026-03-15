@@ -3,12 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/appointment_provider.dart';
 
 class AppointmentDetailPage extends ConsumerWidget {
-  final Map<String, dynamic> appointment;
+  final String appointmentId;
 
-  const AppointmentDetailPage({super.key, required this.appointment});
+  const AppointmentDetailPage({super.key, required this.appointmentId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final appointments = ref.watch(appointmentsProvider);
+
+    final Map<String, dynamic>? appointment = appointments
+        .cast<Map<String, dynamic>?>()
+        .firstWhere((item) => item?['id'] == appointmentId, orElse: () => null);
+
+    if (appointment == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Detail Janji'), centerTitle: false),
+        body: const Center(
+          child: Text(
+            'Data janji tidak ditemukan.',
+            style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          ),
+        ),
+      );
+    }
+
     final id = appointment['id'] as String? ?? '';
     final doctorName = appointment['doctorName'] as String? ?? '-';
     final specialization = appointment['specialization'] as String? ?? '-';

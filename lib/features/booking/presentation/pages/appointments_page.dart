@@ -23,7 +23,10 @@ class AppointmentsPage extends ConsumerWidget {
 
                 return GestureDetector(
                   onTap: () {
-                    context.push('/appointment-detail', extra: item);
+                    context.push(
+                      '/appointment-detail',
+                      extra: item['id'] as String,
+                    );
                   },
                   child: Container(
                     padding: const EdgeInsets.all(16),

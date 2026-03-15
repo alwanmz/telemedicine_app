@@ -47,8 +47,8 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/appointment-detail',
       builder: (context, state) {
-        final appointment = state.extra as Map<String, dynamic>;
-        return AppointmentDetailPage(appointment: appointment);
+        final appointmentId = state.extra as String;
+        return AppointmentDetailPage(appointmentId: appointmentId);
       },
     ),
     GoRoute(

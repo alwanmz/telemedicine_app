@@ -103,7 +103,10 @@ class BookingSuccessPage extends StatelessWidget {
                 height: 54,
                 child: ElevatedButton(
                   onPressed: () {
-                    context.push('/appointment-detail', extra: appointment);
+                    context.push(
+                      '/appointment-detail',
+                      extra: appointment['id'] as String,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2F80ED),
