@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -6,12 +7,13 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final menus = [
-      'Data Pribadi',
-      'Keluarga',
-      'Metode Pembayaran',
-      'Notifikasi',
-      'Bantuan',
-      'Keluar',
+      {'title': 'Data Pribadi'},
+      {'title': 'Keluarga'},
+      {'title': 'Resep Saya', 'route': '/prescriptions'},
+      {'title': 'Metode Pembayaran'},
+      {'title': 'Notifikasi'},
+      {'title': 'Bantuan'},
+      {'title': 'Keluar'},
     ];
 
     return Scaffold(
@@ -50,32 +52,41 @@ class ProfilePage extends StatelessWidget {
           ...menus.map(
             (menu) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        menu,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(18),
+                onTap: () {
+                  final route = menu['route'];
+                  if (route != null) {
+                    context.push(route);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          menu['title']!,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.chevron_right_rounded,
-                      color: Color(0xFF9CA3AF),
-                    ),
-                  ],
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: Color(0xFF9CA3AF),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

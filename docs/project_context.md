@@ -184,3 +184,18 @@ Implement telemedicine chat consultation flow.
 - Belum Dimulai
 - Aktif
 - Selesai
+
+## New Goal
+
+Implement patient prescription (e-resep) flow.
+
+## Prescription Requirements
+
+- Add a "Resep Saya" page for patients
+- Show prescription cards with doctor name, date, and status
+- Add prescription detail page
+- Show medicine items, dosage, frequency, and doctor notes
+- Add "Tebus Obat" button as entry point for the next pharmacy flow
+- Keep the current visual style: clean, rounded, card-based, mobile-first
+- Use dummy local data for now
+- Make minimal, high-confidence changes only

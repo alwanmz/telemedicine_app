@@ -6,9 +6,12 @@ import '../../features/booking/presentation/pages/appointment_detail_page.dart';
 import '../../features/booking/presentation/pages/booking_page.dart';
 import '../../features/booking/presentation/pages/booking_success_page.dart';
 import '../../features/chat/presentation/pages/chat_page.dart';
+import '../../features/chat/presentation/pages/chat_room_page.dart';
 import '../../features/doctors/presentation/pages/doctor_detail_page.dart';
 import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/prescriptions/presentation/pages/prescription_detail_page.dart';
+import '../../features/prescriptions/presentation/pages/prescriptions_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../shared/presentation/pages/main_shell_page.dart';
 import '../../features/booking/presentation/pages/appointments_page.dart';
@@ -49,6 +52,24 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final appointmentId = state.extra as String;
         return AppointmentDetailPage(appointmentId: appointmentId);
+      },
+    ),
+    GoRoute(
+      path: '/chat-room',
+      builder: (context, state) {
+        final session = state.extra as Map<String, dynamic>;
+        return ChatRoomPage(session: session);
+      },
+    ),
+    GoRoute(
+      path: '/prescriptions',
+      builder: (context, state) => const PrescriptionsPage(),
+    ),
+    GoRoute(
+      path: '/prescription-detail',
+      builder: (context, state) {
+        final prescription = state.extra as Map<String, dynamic>;
+        return PrescriptionDetailPage(prescription: prescription);
       },
     ),
     GoRoute(
