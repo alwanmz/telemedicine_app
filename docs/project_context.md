@@ -143,3 +143,44 @@ Implement frontend payment method and payment status flow for telemedicine booki
 - Keep code simple and beginner-friendly
 - Make minimal, high-confidence changes only
 
+## New Goal
+
+Implement dummy payment actions for appointments:
+
+- Bayar Sekarang
+- Tandai Sudah Bayar
+
+## Payment Action Rules
+
+- Tunai starts as unpaid
+- Transfer Bank starts as pending
+- E-Wallet starts as pending
+
+## Dummy Action Behavior
+
+- "Bayar Sekarang" changes paymentStatus to paid
+- "Tandai Sudah Bayar" changes paymentStatus to paid
+- Appointment detail should update immediately after the action
+- Preserve current appointment and payment flow
+- Keep changes minimal and readable
+
+## New Goal
+
+Implement telemedicine chat consultation flow.
+
+## Chat Flow Requirements
+
+- Add a consultation chat list page or reuse the existing Chat tab
+- Show active consultation sessions between patient and doctor
+- Add chat room detail page
+- Show doctor info, session status, and message bubbles
+- Keep the current mobile design style: clean, rounded, card-based
+- Use dummy local data for now
+- Keep the structure simple and beginner-friendly
+- Make minimal, high-confidence changes only
+
+## Session Status
+
+- Belum Dimulai
+- Aktif
+- Selesai

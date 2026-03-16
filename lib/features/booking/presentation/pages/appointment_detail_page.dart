@@ -51,6 +51,8 @@ class AppointmentDetailPage extends ConsumerWidget {
     final status = appointment['status'] as String? ?? 'Terjadwal';
 
     final isCancelled = status == 'Dibatalkan';
+    final canPayNow = paymentStatus == 'unpaid';
+    final canMarkAsPaid = paymentStatus == 'pending';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Janji'), centerTitle: false),
@@ -318,6 +320,63 @@ class AppointmentDetailPage extends ConsumerWidget {
                 label: 'Status Pembayaran',
                 child: _PaymentStatusBadge(status: paymentStatus),
               ),
+              if (!isCancelled && (canPayNow || canMarkAsPaid)) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: canPayNow
+                      ? ElevatedButton(
+                          onPressed: () {
+                            ref
+                                .read(appointmentsProvider.notifier)
+                                .markPaymentAsPaid(id);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Pembayaran berhasil diperbarui'),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2F80ED),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Bayar Sekarang',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        )
+                      : OutlinedButton(
+                          onPressed: () {
+                            ref
+                                .read(appointmentsProvider.notifier)
+                                .markPaymentAsPaid(id);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Pembayaran berhasil diperbarui'),
+                              ),
+                            );
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF2F80ED),
+                            side: const BorderSide(color: Color(0xFFE5E7EB)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: const Text(
+                            'Tandai Sudah Bayar',
+                            style: TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                ),
+              ],
             ],
           ),
         ],
@@ -455,6 +514,10 @@ class _PaymentStatusBadge extends StatelessWidget {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
       label = 'Belum Dibayar';
+    } else if (status == 'paid') {
+      backgroundColor = const Color(0xFFE9FBF6);
+      textColor = const Color(0xFF20B486);
+      label = 'Lunas';
     } else if (status == 'pending') {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);

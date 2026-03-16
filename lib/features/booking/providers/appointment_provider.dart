@@ -17,6 +17,9 @@ class AppointmentsNotifier extends StateNotifier<List<Map<String, dynamic>>> {
           'time': '09:30',
           'consultationType': 'Chat',
           'complaint': 'Kontrol rutin tekanan darah.',
+          'paymentMethod': 'Tunai',
+          'paymentStatus': 'unpaid',
+          'invoiceNumber': 'INV-APT00001',
           'totalPrice': 'Rp 80.000',
           'status': 'Terjadwal',
         },
@@ -48,6 +51,15 @@ class AppointmentsNotifier extends StateNotifier<List<Map<String, dynamic>>> {
           'time': newTime,
           'status': 'Dijadwalkan Ulang',
         };
+      }
+      return item;
+    }).toList();
+  }
+
+  void markPaymentAsPaid(String id) {
+    state = state.map((item) {
+      if (item['id'] == id) {
+        return {...item, 'paymentStatus': 'paid'};
       }
       return item;
     }).toList();
