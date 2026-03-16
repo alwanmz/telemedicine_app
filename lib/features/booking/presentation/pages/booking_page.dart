@@ -72,8 +72,12 @@ class _BookingPageState extends ConsumerState<BookingPage> {
             height: 54,
             child: ElevatedButton(
               onPressed: () {
+                final appointmentId =
+                    DateTime.now().millisecondsSinceEpoch.toString();
+                final invoiceNumber = _buildInvoiceNumber(appointmentId);
+
                 final appointment = {
-                  'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                  'id': appointmentId,
                   'doctorName': doctorName,
                   'specialization': specialization,
                   'hospital': hospitalName,
@@ -88,6 +92,8 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                   'weight': weightController.text.trim(),
                   'height': heightController.text.trim(),
                   'paymentMethod': selectedPaymentMethod,
+                  'paymentStatus': _resolvePaymentStatus(selectedPaymentMethod),
+                  'invoiceNumber': invoiceNumber,
                   'totalPrice': 'Rp 80.000',
                   'status': 'Terjadwal',
                 };
@@ -405,6 +411,18 @@ class _BookingPageState extends ConsumerState<BookingPage> {
         ],
       ),
     );
+  }
+
+  String _resolvePaymentStatus(String paymentMethod) {
+    if (paymentMethod == 'Tunai') return 'unpaid';
+    return 'pending';
+  }
+
+  String _buildInvoiceNumber(String appointmentId) {
+    final suffix = appointmentId.length > 8
+        ? appointmentId.substring(appointmentId.length - 8)
+        : appointmentId;
+    return 'INV-$suffix';
   }
 }
 

@@ -120,3 +120,26 @@ Implement a telemedicine intake form aligned with the telemedicine PDF workflow.
 - Keep code readable and beginner-friendly
 - Make minimal, high-confidence changes
 - Do not refactor unrelated files
+
+## New Goal
+
+Implement frontend payment method and payment status flow for telemedicine booking.
+
+## Payment Rules
+
+- Store payment method in the appointment object
+- Add payment status to the appointment object
+- Add invoice number to the appointment object
+- Initial payment statuses:
+  - Tunai -> unpaid
+  - Transfer Bank -> pending
+  - E-Wallet -> pending
+
+## UI Requirements
+
+- Preserve current booking flow
+- Preserve current visual style
+- Show payment method, payment status, and invoice number in appointment detail
+- Keep code simple and beginner-friendly
+- Make minimal, high-confidence changes only
+

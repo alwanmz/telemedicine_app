@@ -42,6 +42,11 @@ class AppointmentDetailPage extends ConsumerWidget {
     final weight = appointment['weight'] as String? ?? '-';
     final height = appointment['height'] as String? ?? '-';
     final paymentMethod = appointment['paymentMethod'] as String? ?? '-';
+    final invoiceNumber = appointment['invoiceNumber'] as String? ?? '-';
+    final paymentStatus = _resolvePaymentStatus(
+      appointment['paymentStatus'] as String?,
+      paymentMethod,
+    );
     final totalPrice = appointment['totalPrice'] as String? ?? 'Rp 80.000';
     final status = appointment['status'] as String? ?? 'Terjadwal';
 
@@ -303,10 +308,15 @@ class AppointmentDetailPage extends ConsumerWidget {
           _DetailCard(
             title: 'Pembayaran',
             children: [
+              _DetailRow(label: 'No. Invoice', value: invoiceNumber),
               _DetailRow(label: 'Total Biaya', value: totalPrice),
               _DetailRow(
                 label: 'Metode Bayar',
                 value: paymentMethod.isEmpty ? '-' : paymentMethod,
+              ),
+              _DetailWidgetRow(
+                label: 'Status Pembayaran',
+                child: _PaymentStatusBadge(status: paymentStatus),
               ),
             ],
           ),
@@ -319,6 +329,15 @@ class AppointmentDetailPage extends ConsumerWidget {
     if (status == 'Dibatalkan') return const Color(0xFFDC2626);
     if (status == 'Dijadwalkan Ulang') return const Color(0xFFEA580C);
     return const Color(0xFF20B486);
+  }
+
+  String _resolvePaymentStatus(String? rawStatus, String paymentMethod) {
+    if (rawStatus != null && rawStatus.isNotEmpty) return rawStatus;
+    if (paymentMethod == 'Tunai') return 'unpaid';
+    if (paymentMethod == 'Transfer Bank' || paymentMethod == 'E-Wallet') {
+      return 'pending';
+    }
+    return '-';
   }
 }
 
@@ -389,6 +408,76 @@ class _DetailRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DetailWidgetRow extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _DetailWidgetRow({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentStatusBadge extends StatelessWidget {
+  final String status;
+
+  const _PaymentStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    late final Color backgroundColor;
+    late final Color textColor;
+    late final String label;
+
+    if (status == 'unpaid') {
+      backgroundColor = const Color(0xFFFEF2F2);
+      textColor = const Color(0xFFDC2626);
+      label = 'Belum Dibayar';
+    } else if (status == 'pending') {
+      backgroundColor = const Color(0xFFFFF7ED);
+      textColor = const Color(0xFFEA580C);
+      label = 'Menunggu';
+    } else {
+      backgroundColor = const Color(0xFFF3F4F6);
+      textColor = const Color(0xFF6B7280);
+      label = '-';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
       ),
     );
   }
