@@ -94,3 +94,29 @@ Enhance the Janji Temu status segmented tabs by adding counters:
 - Counter should be compact and visually secondary but still readable
 - Do not make the tabs feel crowded
 - Preserve current filtering behavior
+
+## New Goal
+
+Implement a telemedicine intake form aligned with the telemedicine PDF workflow.
+
+## Intake Form Fields
+
+- chief complaint
+- allergy history
+- blood pressure
+- body temperature
+- weight
+- height
+- patient type: Umum / Asuransi / BPJS
+- consultation method: Chat / Voice Call / Video Call
+- payment method: Tunai / Transfer Bank / E-Wallet
+
+## Behavior Required
+
+- Preserve the existing booking flow
+- Keep current visual style
+- The intake form should fit naturally into the booking flow
+- Store the intake data together with the appointment object
+- Keep code readable and beginner-friendly
+- Make minimal, high-confidence changes
+- Do not refactor unrelated files

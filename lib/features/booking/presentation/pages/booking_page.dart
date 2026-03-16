@@ -16,7 +16,17 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   String selectedDate = 'Senin, 18 Maret 2026';
   String selectedTime = '09:00';
   String selectedConsultationType = 'Chat';
+  String selectedPatientType = 'Umum';
+  String selectedPaymentMethod = 'Tunai';
   final TextEditingController complaintController = TextEditingController();
+  final TextEditingController allergyHistoryController =
+      TextEditingController();
+  final TextEditingController bloodPressureController =
+      TextEditingController();
+  final TextEditingController bodyTemperatureController =
+      TextEditingController();
+  final TextEditingController weightController = TextEditingController();
+  final TextEditingController heightController = TextEditingController();
 
   final List<String> dates = [
     'Senin, 18 Maret 2026',
@@ -27,10 +37,21 @@ class _BookingPageState extends ConsumerState<BookingPage> {
   final List<String> times = ['09:00', '10:00', '11:00', '13:00', '14:00'];
 
   final List<String> consultationTypes = ['Chat', 'Voice Call', 'Video Call'];
+  final List<String> patientTypes = ['Umum', 'Asuransi', 'BPJS'];
+  final List<String> paymentMethods = [
+    'Tunai',
+    'Transfer Bank',
+    'E-Wallet',
+  ];
 
   @override
   void dispose() {
     complaintController.dispose();
+    allergyHistoryController.dispose();
+    bloodPressureController.dispose();
+    bodyTemperatureController.dispose();
+    weightController.dispose();
+    heightController.dispose();
     super.dispose();
   }
 
@@ -59,7 +80,14 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                   'date': selectedDate,
                   'time': selectedTime,
                   'consultationType': selectedConsultationType,
+                  'patientType': selectedPatientType,
                   'complaint': complaintController.text.trim(),
+                  'allergyHistory': allergyHistoryController.text.trim(),
+                  'bloodPressure': bloodPressureController.text.trim(),
+                  'bodyTemperature': bodyTemperatureController.text.trim(),
+                  'weight': weightController.text.trim(),
+                  'height': heightController.text.trim(),
+                  'paymentMethod': selectedPaymentMethod,
                   'totalPrice': 'Rp 80.000',
                   'status': 'Terjadwal',
                 };
@@ -230,6 +258,27 @@ class _BookingPageState extends ConsumerState<BookingPage> {
           ),
           const SizedBox(height: 14),
           _SectionCard(
+            title: 'Tipe Pasien',
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: patientTypes.map((type) {
+                final isSelected = selectedPatientType == type;
+                return _SelectableChip(
+                  label: type,
+                  isSelected: isSelected,
+                  compact: true,
+                  onTap: () {
+                    setState(() {
+                      selectedPatientType = type;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _SectionCard(
             title: 'Keluhan Utama',
             child: TextField(
               controller: complaintController,
@@ -255,6 +304,91 @@ class _BookingPageState extends ConsumerState<BookingPage> {
             ),
           ),
           const SizedBox(height: 14),
+          _SectionCard(
+            title: 'Informasi Medis',
+            child: Column(
+              children: [
+                _InputField(
+                  controller: allergyHistoryController,
+                  label: 'Riwayat Alergi',
+                  hintText: 'Contoh: Tidak ada / Alergi penisilin',
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _InputField(
+                        controller: bloodPressureController,
+                        label: 'Tekanan Darah',
+                        hintText: '120/80',
+                        keyboardType: TextInputType.text,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _InputField(
+                        controller: bodyTemperatureController,
+                        label: 'Suhu Tubuh',
+                        hintText: '36.8 C',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _InputField(
+                        controller: weightController,
+                        label: 'Berat Badan',
+                        hintText: '55 kg',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _InputField(
+                        controller: heightController,
+                        label: 'Tinggi Badan',
+                        hintText: '165 cm',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          _SectionCard(
+            title: 'Metode Pembayaran',
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: paymentMethods.map((method) {
+                final isSelected = selectedPaymentMethod == method;
+                return _SelectableChip(
+                  label: method,
+                  isSelected: isSelected,
+                  compact: true,
+                  onTap: () {
+                    setState(() {
+                      selectedPaymentMethod = method;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
           const _SectionCard(
             title: 'Ringkasan Biaya',
             child: Column(
@@ -270,6 +404,63 @@ class _BookingPageState extends ConsumerState<BookingPage> {
           const SizedBox(height: 100),
         ],
       ),
+    );
+  }
+}
+
+class _InputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String hintText;
+  final int maxLines;
+  final TextInputType keyboardType;
+
+  const _InputField({
+    required this.controller,
+    required this.label,
+    required this.hintText,
+    this.maxLines = 1,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          maxLines: maxLines,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hintText,
+            filled: true,
+            fillColor: const Color(0xFFF9FAFB),
+            contentPadding: const EdgeInsets.all(16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(18),
+              borderSide: const BorderSide(color: Color(0xFF2F80ED)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

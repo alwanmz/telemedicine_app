@@ -34,7 +34,14 @@ class AppointmentDetailPage extends ConsumerWidget {
     final date = appointment['date'] as String? ?? '-';
     final time = appointment['time'] as String? ?? '-';
     final consultationType = appointment['consultationType'] as String? ?? '-';
+    final patientType = appointment['patientType'] as String? ?? '-';
     final complaint = appointment['complaint'] as String? ?? '-';
+    final allergyHistory = appointment['allergyHistory'] as String? ?? '-';
+    final bloodPressure = appointment['bloodPressure'] as String? ?? '-';
+    final bodyTemperature = appointment['bodyTemperature'] as String? ?? '-';
+    final weight = appointment['weight'] as String? ?? '-';
+    final height = appointment['height'] as String? ?? '-';
+    final paymentMethod = appointment['paymentMethod'] as String? ?? '-';
     final totalPrice = appointment['totalPrice'] as String? ?? 'Rp 80.000';
     final status = appointment['status'] as String? ?? 'Terjadwal';
 
@@ -230,6 +237,7 @@ class AppointmentDetailPage extends ConsumerWidget {
               _DetailRow(label: 'Tanggal', value: date),
               _DetailRow(label: 'Jam', value: time),
               _DetailRow(label: 'Metode Konsultasi', value: consultationType),
+              _DetailRow(label: 'Tipe Pasien', value: patientType),
               _DetailRow(
                 label: 'Status',
                 value: status,
@@ -253,10 +261,53 @@ class AppointmentDetailPage extends ConsumerWidget {
           ),
           const SizedBox(height: 14),
           _DetailCard(
+            title: 'Data Intake',
+            children: [
+              _DetailRow(
+                label: 'Tekanan Darah',
+                value: bloodPressure.isEmpty ? '-' : bloodPressure,
+              ),
+              _DetailRow(
+                label: 'Suhu Tubuh',
+                value: bodyTemperature.isEmpty ? '-' : bodyTemperature,
+              ),
+              _DetailRow(
+                label: 'Berat Badan',
+                value: weight.isEmpty ? '-' : weight,
+              ),
+              _DetailRow(
+                label: 'Tinggi Badan',
+                value: height.isEmpty ? '-' : height,
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Riwayat Alergi',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                allergyHistory.isEmpty ? '-' : allergyHistory,
+                style: const TextStyle(
+                  fontSize: 13,
+                  height: 1.6,
+                  color: Color(0xFF4B5563),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _DetailCard(
             title: 'Pembayaran',
             children: [
               _DetailRow(label: 'Total Biaya', value: totalPrice),
-              _DetailRow(label: 'Metode Bayar', value: 'Belum dipilih'),
+              _DetailRow(
+                label: 'Metode Bayar',
+                value: paymentMethod.isEmpty ? '-' : paymentMethod,
+              ),
             ],
           ),
         ],
