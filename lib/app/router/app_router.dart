@@ -11,6 +11,7 @@ import '../../features/doctors/presentation/pages/doctor_detail_page.dart';
 import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/prescriptions/presentation/pages/pharmacy_order_detail_page.dart';
+import '../../features/prescriptions/presentation/pages/pharmacy_orders_page.dart';
 import '../../features/prescriptions/presentation/pages/prescription_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/prescriptions_page.dart';
 import '../../features/prescriptions/presentation/pages/redeem_medicine_page.dart';
@@ -80,6 +81,10 @@ final GoRouter appRouter = GoRouter(
         final prescription = state.extra as Map<String, dynamic>;
         return RedeemMedicinePage(prescription: prescription);
       },
+    ),
+    GoRoute(
+      path: '/pharmacy-orders',
+      builder: (context, state) => const PharmacyOrdersPage(),
     ),
     GoRoute(
       path: '/pharmacy-order-detail',

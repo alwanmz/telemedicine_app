@@ -229,3 +229,17 @@ Implement medicine redemption (Tebus Obat) and pharmacy order tracking flow.
 - Use dummy local data for now
 - Make minimal, high-confidence changes only
 - Do not refactor unrelated files
+
+## New Goal
+
+Implement pharmacy order state and patient pharmacy order list.
+
+## Requirements
+
+- Save medicine redemption orders into a pharmacy order provider
+- Add a "Pesanan Obat Saya" page
+- Show pharmacy order cards with order number, date, total, and status
+- Keep existing pharmacy order detail navigation working
+- Use dummy local data for now
+- Keep current visual style
+- Make minimal, high-confidence changes only

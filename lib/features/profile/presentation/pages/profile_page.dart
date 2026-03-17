@@ -10,6 +10,7 @@ class ProfilePage extends StatelessWidget {
       {'title': 'Data Pribadi'},
       {'title': 'Keluarga'},
       {'title': 'Resep Saya', 'route': '/prescriptions'},
+      {'title': 'Pesanan Obat Saya', 'route': '/pharmacy-orders'},
       {'title': 'Metode Pembayaran'},
       {'title': 'Notifikasi'},
       {'title': 'Bantuan'},

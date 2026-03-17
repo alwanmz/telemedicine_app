@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class RedeemMedicinePage extends StatefulWidget {
+import '../../providers/pharmacy_order_provider.dart';
+
+class RedeemMedicinePage extends ConsumerStatefulWidget {
   final Map<String, dynamic> prescription;
 
   const RedeemMedicinePage({super.key, required this.prescription});
 
   @override
-  State<RedeemMedicinePage> createState() => _RedeemMedicinePageState();
+  ConsumerState<RedeemMedicinePage> createState() => _RedeemMedicinePageState();
 }
 
-class _RedeemMedicinePageState extends State<RedeemMedicinePage> {
+class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
   String selectedDeliveryMethod = 'Reguler';
 
   static const List<String> _deliveryMethods = [
@@ -48,7 +51,9 @@ class _RedeemMedicinePageState extends State<RedeemMedicinePage> {
               onPressed: () {
                 final orderId = DateTime.now().millisecondsSinceEpoch.toString();
                 final order = {
+                  'id': orderId,
                   'orderNumber': _buildOrderNumber(orderId),
+                  'orderDate': _buildOrderDate(),
                   'status': 'Menunggu Pembayaran',
                   'doctorName': widget.prescription['doctorName'],
                   'prescriptionDate': widget.prescription['date'],
@@ -60,6 +65,7 @@ class _RedeemMedicinePageState extends State<RedeemMedicinePage> {
                   'total': total,
                 };
 
+                ref.read(pharmacyOrdersProvider.notifier).addOrder(order);
                 context.push('/pharmacy-order-detail', extra: order);
               },
               style: ElevatedButton.styleFrom(
@@ -246,6 +252,27 @@ class _RedeemMedicinePageState extends State<RedeemMedicinePage> {
   String _buildOrderNumber(String id) {
     final suffix = id.length > 8 ? id.substring(id.length - 8) : id;
     return 'ORD-$suffix';
+  }
+
+  String _buildOrderDate() {
+    const monthNames = [
+      '',
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+
+    final now = DateTime.now();
+    return '${now.day} ${monthNames[now.month]} ${now.year}';
   }
 
   String _formatCurrency(int value) {
