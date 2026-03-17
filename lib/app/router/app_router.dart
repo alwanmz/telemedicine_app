@@ -10,8 +10,10 @@ import '../../features/chat/presentation/pages/chat_room_page.dart';
 import '../../features/doctors/presentation/pages/doctor_detail_page.dart';
 import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/prescriptions/presentation/pages/pharmacy_order_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/prescription_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/prescriptions_page.dart';
+import '../../features/prescriptions/presentation/pages/redeem_medicine_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../shared/presentation/pages/main_shell_page.dart';
 import '../../features/booking/presentation/pages/appointments_page.dart';
@@ -70,6 +72,20 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final prescription = state.extra as Map<String, dynamic>;
         return PrescriptionDetailPage(prescription: prescription);
+      },
+    ),
+    GoRoute(
+      path: '/redeem-medicine',
+      builder: (context, state) {
+        final prescription = state.extra as Map<String, dynamic>;
+        return RedeemMedicinePage(prescription: prescription);
+      },
+    ),
+    GoRoute(
+      path: '/pharmacy-order-detail',
+      builder: (context, state) {
+        final order = state.extra as Map<String, dynamic>;
+        return PharmacyOrderDetailPage(order: order);
       },
     ),
     GoRoute(

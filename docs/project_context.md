@@ -199,3 +199,33 @@ Implement patient prescription (e-resep) flow.
 - Keep the current visual style: clean, rounded, card-based, mobile-first
 - Use dummy local data for now
 - Make minimal, high-confidence changes only
+
+## New Goal
+
+Implement medicine redemption (Tebus Obat) and pharmacy order tracking flow.
+
+## Tebus Obat Requirements
+
+- Add a medicine redemption page from the prescription detail page
+- Show medicine items from the prescription
+- Show shipping address section
+- Show delivery method selection
+- Show medicine subtotal, shipping cost, and total cost
+- Add a confirmation button as the next step
+
+## Pharmacy Order Tracking Requirements
+
+- Add pharmacy order detail page
+- Show order number, prescription source, medicine items, shipping address, and delivery method
+- Show pharmacy order status:
+  - Menunggu Pembayaran
+  - Diproses Farmasi
+  - Dikirim
+  - Selesai
+
+## Rules
+
+- Keep current visual style
+- Use dummy local data for now
+- Make minimal, high-confidence changes only
+- Do not refactor unrelated files

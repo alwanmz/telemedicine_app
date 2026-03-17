@@ -36,11 +36,14 @@ class FeatureGrid extends StatelessWidget {
         iconBg: Color(0xFFEFF8FF),
         iconColor: Color(0xFF3A86FF),
       ),
-      const FeatureItem(
-        icon: Icons.vaccines_outlined,
-        label: 'Vaksin\nCovid-19',
-        iconBg: Color(0xFFFFF6E8),
-        iconColor: Color(0xFFF5A623),
+      FeatureItem(
+        icon: Icons.receipt_long_outlined,
+        label: 'Resep\nSaya',
+        iconBg: const Color(0xFFFFF6E8),
+        iconColor: const Color(0xFFF5A623),
+        onTap: () {
+          context.push('/prescriptions');
+        },
       ),
       const FeatureItem(
         icon: Icons.local_hospital_outlined,

@@ -1,53 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-class PrescriptionDetailPage extends StatelessWidget {
-  final Map<String, dynamic> prescription;
+class PharmacyOrderDetailPage extends StatelessWidget {
+  final Map<String, dynamic> order;
 
-  const PrescriptionDetailPage({super.key, required this.prescription});
+  const PharmacyOrderDetailPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
-    final doctorName = prescription['doctorName'] as String? ?? '-';
-    final date = prescription['date'] as String? ?? '-';
-    final status = prescription['status'] as String? ?? 'Aktif';
-    final notes = prescription['notes'] as String? ?? '-';
+    final orderNumber = order['orderNumber'] as String? ?? '-';
+    final status = order['status'] as String? ?? 'Menunggu Pembayaran';
+    final doctorName = order['doctorName'] as String? ?? '-';
+    final prescriptionDate = order['prescriptionDate'] as String? ?? '-';
+    final deliveryMethod = order['deliveryMethod'] as String? ?? '-';
+    final shippingAddress =
+        order['shippingAddress'] as Map<String, dynamic>? ?? const {};
     final medicines =
-        (prescription['medicines'] as List<dynamic>? ?? [])
-            .cast<Map<String, dynamic>>();
+        (order['medicines'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail Resep'), centerTitle: false),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-          child: SizedBox(
-            height: 54,
-            child: ElevatedButton(
-              onPressed: () {
-                context.push('/redeem-medicine', extra: prescription);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2F80ED),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
-              child: const Text(
-                'Tebus Obat',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Lacak Pesanan'), centerTitle: false),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
-          _DetailCard(
+          _SectionCard(
             child: Row(
               children: [
                 Container(
@@ -58,7 +33,7 @@ class PrescriptionDetailPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Icon(
-                    Icons.receipt_long_rounded,
+                    Icons.local_pharmacy_rounded,
                     size: 32,
                     color: Color(0xFF2F80ED),
                   ),
@@ -69,7 +44,7 @@ class PrescriptionDetailPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        doctorName,
+                        orderNumber,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
@@ -78,14 +53,15 @@ class PrescriptionDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        date,
+                        'Resep dari $doctorName \u2022 $prescriptionDate',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Color(0xFF6B7280),
+                          height: 1.5,
                         ),
                       ),
                       const SizedBox(height: 10),
-                      _PrescriptionStatusBadge(status: status),
+                      _OrderStatusBadge(status: status),
                     ],
                   ),
                 ),
@@ -93,7 +69,65 @@ class PrescriptionDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          _DetailCard(
+          _SectionCard(
+            title: 'Status Pesanan',
+            child: Column(
+              children: _statuses.map((item) {
+                final currentIndex = _statuses.indexOf(status);
+                final index = _statuses.indexOf(item);
+                final isActive = item == status;
+                final isPassed =
+                    currentIndex != -1 && index < currentIndex;
+
+                return Padding(
+                  padding: EdgeInsets.only(bottom: item == _statuses.last ? 0 : 12),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: isActive || isPassed
+                              ? const Color(0xFF2F80ED)
+                              : const Color(0xFFF3F4F6),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isActive || isPassed
+                              ? Icons.check_rounded
+                              : Icons.circle,
+                          size: 14,
+                          color: isActive || isPassed
+                              ? Colors.white
+                              : const Color(0xFFD1D5DB),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            item,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight:
+                                  isActive ? FontWeight.w700 : FontWeight.w500,
+                              color: isActive || isPassed
+                                  ? const Color(0xFF1F2937)
+                                  : const Color(0xFF9CA3AF),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 14),
+          _SectionCard(
             title: 'Daftar Obat',
             child: Column(
               children: medicines.map((medicine) {
@@ -138,29 +172,59 @@ class PrescriptionDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          _DetailCard(
-            title: 'Catatan Dokter',
-            child: Text(
-              notes,
-              style: const TextStyle(
-                fontSize: 13,
-                height: 1.6,
-                color: Color(0xFF4B5563),
-              ),
+          _SectionCard(
+            title: 'Info Pengiriman',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _InfoRow(label: 'Metode', value: deliveryMethod),
+                const SizedBox(height: 10),
+                Text(
+                  shippingAddress['recipient'] as String? ?? '-',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  shippingAddress['phone'] as String? ?? '-',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF4B5563),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  shippingAddress['address'] as String? ?? '-',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    height: 1.5,
+                    color: Color(0xFF6B7280),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 100),
         ],
       ),
     );
   }
+
+  static const List<String> _statuses = [
+    'Menunggu Pembayaran',
+    'Diproses Farmasi',
+    'Dikirim',
+    'Selesai',
+  ];
 }
 
-class _DetailCard extends StatelessWidget {
+class _SectionCard extends StatelessWidget {
   final String? title;
   final Widget child;
 
-  const _DetailCard({this.title, required this.child});
+  const _SectionCard({this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -222,25 +286,28 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _PrescriptionStatusBadge extends StatelessWidget {
+class _OrderStatusBadge extends StatelessWidget {
   final String status;
 
-  const _PrescriptionStatusBadge({required this.status});
+  const _OrderStatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     late final Color textColor;
 
-    if (status == 'Aktif') {
+    if (status == 'Selesai') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-    } else if (status == 'Selesai') {
-      backgroundColor = const Color(0xFFF3F4F6);
-      textColor = const Color(0xFF6B7280);
-    } else {
+    } else if (status == 'Dikirim') {
+      backgroundColor = const Color(0xFFEAF4FF);
+      textColor = const Color(0xFF2F80ED);
+    } else if (status == 'Diproses Farmasi') {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
+    } else {
+      backgroundColor = const Color(0xFFFEF2F2);
+      textColor = const Color(0xFFDC2626);
     }
 
     return Container(
