@@ -243,3 +243,19 @@ Implement pharmacy order state and patient pharmacy order list.
 - Use dummy local data for now
 - Keep current visual style
 - Make minimal, high-confidence changes only
+
+## New Goal
+
+Automatically mark a prescription as completed after the user successfully confirms medicine redemption.
+
+## Requirements
+
+- When the user confirms "Tebus Obat", the related prescription status should change from "Aktif" to "Selesai"
+- The updated status should be reflected in:
+  - prescription list
+  - prescription detail page
+- A completed prescription must no longer allow medicine redemption
+- Keep the current visual style
+- Use local dummy state/provider for now
+- Make minimal, high-confidence changes only
+- Do not refactor unrelated files

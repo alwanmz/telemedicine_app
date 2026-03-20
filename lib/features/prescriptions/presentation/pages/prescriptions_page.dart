@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class PrescriptionsPage extends StatelessWidget {
+import '../../providers/prescription_provider.dart';
+
+class PrescriptionsPage extends ConsumerWidget {
   const PrescriptionsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final prescriptions = _dummyPrescriptions;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prescriptions = ref.watch(prescriptionsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Resep Saya'), centerTitle: false),
@@ -88,69 +91,6 @@ class PrescriptionsPage extends StatelessWidget {
     );
   }
 }
-
-const List<Map<String, dynamic>> _dummyPrescriptions = [
-  {
-    'id': 'rx_1',
-    'doctorName': 'Dr. Amanda Putri, Sp.PD',
-    'date': '17 Maret 2026',
-    'status': 'Aktif',
-    'notes':
-        'Minum obat setelah makan dan perbanyak istirahat. Jika tekanan darah tetap tinggi, lakukan kontrol ulang.',
-    'medicines': [
-      {
-        'name': 'Amlodipine 5 mg',
-        'dosage': '1 tablet',
-        'frequency': '1x sehari setelah sarapan',
-      },
-      {
-        'name': 'Paracetamol 500 mg',
-        'dosage': '1 tablet',
-        'frequency': '3x sehari bila perlu',
-      },
-    ],
-  },
-  {
-    'id': 'rx_2',
-    'doctorName': 'Dr. Budi Santoso, Sp.A',
-    'date': '15 Maret 2026',
-    'status': 'Menunggu Tebus',
-    'notes':
-        'Obat diberikan untuk menurunkan demam dan membantu pemulihan. Pastikan anak cukup minum.',
-    'medicines': [
-      {
-        'name': 'Sirup Paracetamol',
-        'dosage': '5 ml',
-        'frequency': '3x sehari',
-      },
-      {
-        'name': 'Vitamin C Anak',
-        'dosage': '1 tablet kunyah',
-        'frequency': '1x sehari',
-      },
-    ],
-  },
-  {
-    'id': 'rx_3',
-    'doctorName': 'Dr. Citra Lestari, Sp.KK',
-    'date': '10 Maret 2026',
-    'status': 'Selesai',
-    'notes':
-        'Lanjutkan perawatan kulit dan hindari sabun dengan bahan iritatif selama masa pengobatan.',
-    'medicines': [
-      {
-        'name': 'Cetirizine 10 mg',
-        'dosage': '1 tablet',
-        'frequency': '1x malam hari',
-      },
-      {
-        'name': 'Krim Hydrocortisone',
-        'dosage': 'Oles tipis',
-        'frequency': '2x sehari',
-      },
-    ],
-  },
-];
 
 class _PrescriptionStatusBadge extends StatelessWidget {
   final String status;

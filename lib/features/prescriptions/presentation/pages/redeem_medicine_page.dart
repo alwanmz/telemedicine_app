@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/pharmacy_order_provider.dart';
+import '../../providers/prescription_provider.dart';
 
 class RedeemMedicinePage extends ConsumerStatefulWidget {
   final Map<String, dynamic> prescription;
@@ -16,15 +17,18 @@ class RedeemMedicinePage extends ConsumerStatefulWidget {
 class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
   String selectedDeliveryMethod = 'Reguler';
 
-  static const List<String> _deliveryMethods = [
-    'Reguler',
-    'Same Day',
-  ];
+  static const List<String> _deliveryMethods = ['Reguler', 'Same Day'];
 
   @override
   Widget build(BuildContext context) {
+    final prescriptionId = widget.prescription['id'] as String?;
+    final currentPrescription =
+        _findPrescription(ref.watch(prescriptionsProvider), prescriptionId) ??
+        widget.prescription;
+    final status = currentPrescription['status'] as String? ?? 'Aktif';
+    final isRedeemable = status == 'Aktif';
     final medicines = _buildPricedMedicines(
-      (widget.prescription['medicines'] as List<dynamic>? ?? [])
+      (currentPrescription['medicines'] as List<dynamic>? ?? [])
           .cast<Map<String, dynamic>>(),
     );
     final subtotal = medicines.fold<int>(
@@ -48,29 +52,40 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
           child: SizedBox(
             height: 54,
             child: ElevatedButton(
-              onPressed: () {
-                final orderId = DateTime.now().millisecondsSinceEpoch.toString();
-                final order = {
-                  'id': orderId,
-                  'orderNumber': _buildOrderNumber(orderId),
-                  'orderDate': _buildOrderDate(),
-                  'status': 'Menunggu Pembayaran',
-                  'doctorName': widget.prescription['doctorName'],
-                  'prescriptionDate': widget.prescription['date'],
-                  'deliveryMethod': selectedDeliveryMethod,
-                  'shippingAddress': shippingAddress,
-                  'medicines': medicines,
-                  'subtotal': subtotal,
-                  'shippingCost': shippingCost,
-                  'total': total,
-                };
+              onPressed: isRedeemable
+                  ? () {
+                      final orderId = DateTime.now().millisecondsSinceEpoch
+                          .toString();
+                      final order = {
+                        'id': orderId,
+                        'prescriptionId': prescriptionId,
+                        'orderNumber': _buildOrderNumber(orderId),
+                        'orderDate': _buildOrderDate(),
+                        'status': 'Menunggu Pembayaran',
+                        'doctorName': currentPrescription['doctorName'],
+                        'prescriptionDate': currentPrescription['date'],
+                        'deliveryMethod': selectedDeliveryMethod,
+                        'shippingAddress': shippingAddress,
+                        'medicines': medicines,
+                        'subtotal': subtotal,
+                        'shippingCost': shippingCost,
+                        'total': total,
+                      };
 
-                ref.read(pharmacyOrdersProvider.notifier).addOrder(order);
-                context.push('/pharmacy-order-detail', extra: order);
-              },
+                      ref.read(pharmacyOrdersProvider.notifier).addOrder(order);
+                      if (prescriptionId != null) {
+                        ref
+                            .read(prescriptionsProvider.notifier)
+                            .markAsCompleted(prescriptionId);
+                      }
+                      context.push('/pharmacy-order-detail', extra: order);
+                    }
+                  : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2F80ED),
                 foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFFF3F4F6),
+                disabledForegroundColor: const Color(0xFF6B7280),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
@@ -127,7 +142,9 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                         const SizedBox(height: 6),
                         _InfoRow(
                           label: 'Harga',
-                          value: _formatCurrency(medicine['price'] as int? ?? 0),
+                          value: _formatCurrency(
+                            medicine['price'] as int? ?? 0,
+                          ),
                         ),
                       ],
                     ),
@@ -219,14 +236,21 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
             title: 'Ringkasan Pembayaran',
             child: Column(
               children: [
-                _InfoRow(label: 'Subtotal Obat', value: _formatCurrency(subtotal)),
+                _InfoRow(
+                  label: 'Subtotal Obat',
+                  value: _formatCurrency(subtotal),
+                ),
                 const SizedBox(height: 10),
                 _InfoRow(
                   label: 'Biaya Pengiriman',
                   value: _formatCurrency(shippingCost),
                 ),
                 const Divider(height: 24),
-                _InfoRow(label: 'Total', value: _formatCurrency(total), isTotal: true),
+                _InfoRow(
+                  label: 'Total',
+                  value: _formatCurrency(total),
+                  isTotal: true,
+                ),
               ],
             ),
           ),
@@ -242,10 +266,7 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
     const prices = [25000, 18000, 32000, 22000];
 
     return medicines.asMap().entries.map((entry) {
-      return {
-        ...entry.value,
-        'price': prices[entry.key % prices.length],
-      };
+      return {...entry.value, 'price': prices[entry.key % prices.length]};
     }).toList();
   }
 
@@ -289,6 +310,23 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
 
     return 'Rp $buffer';
   }
+}
+
+Map<String, dynamic>? _findPrescription(
+  List<Map<String, dynamic>> prescriptions,
+  String? id,
+) {
+  if (id == null) {
+    return null;
+  }
+
+  for (final prescription in prescriptions) {
+    if (prescription['id'] == id) {
+      return prescription;
+    }
+  }
+
+  return null;
 }
 
 class _SectionCard extends StatelessWidget {

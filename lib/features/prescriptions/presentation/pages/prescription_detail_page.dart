@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class PrescriptionDetailPage extends StatelessWidget {
+import '../../providers/prescription_provider.dart';
+
+class PrescriptionDetailPage extends ConsumerWidget {
   final Map<String, dynamic> prescription;
 
   const PrescriptionDetailPage({super.key, required this.prescription});
 
   @override
-  Widget build(BuildContext context) {
-    final doctorName = prescription['doctorName'] as String? ?? '-';
-    final date = prescription['date'] as String? ?? '-';
-    final status = prescription['status'] as String? ?? 'Aktif';
-    final notes = prescription['notes'] as String? ?? '-';
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prescriptionId = prescription['id'] as String?;
+    final currentPrescription =
+        _findPrescription(ref.watch(prescriptionsProvider), prescriptionId) ??
+        prescription;
+    final doctorName = currentPrescription['doctorName'] as String? ?? '-';
+    final date = currentPrescription['date'] as String? ?? '-';
+    final status = currentPrescription['status'] as String? ?? 'Aktif';
+    final isRedeemable = status == 'Aktif';
+    final actionLabel = isRedeemable ? 'Tebus Obat' : 'Resep Sudah Selesai';
+    final notes = currentPrescription['notes'] as String? ?? '-';
     final medicines =
-        (prescription['medicines'] as List<dynamic>? ?? [])
+        (currentPrescription['medicines'] as List<dynamic>? ?? [])
             .cast<Map<String, dynamic>>();
 
     return Scaffold(
@@ -25,20 +34,31 @@ class PrescriptionDetailPage extends StatelessWidget {
           child: SizedBox(
             height: 54,
             child: ElevatedButton(
-              onPressed: () {
-                context.push('/redeem-medicine', extra: prescription);
-              },
+              onPressed:
+                  isRedeemable
+                      ? () {
+                        context.push(
+                          '/redeem-medicine',
+                          extra: currentPrescription,
+                        );
+                      }
+                      : null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2F80ED),
                 foregroundColor: Colors.white,
+                disabledBackgroundColor: const Color(0xFFF3F4F6),
+                disabledForegroundColor: const Color(0xFF6B7280),
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(18),
                 ),
               ),
-              child: const Text(
-                'Tebus Obat',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              child: Text(
+                actionLabel,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
@@ -154,6 +174,23 @@ class PrescriptionDetailPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Map<String, dynamic>? _findPrescription(
+  List<Map<String, dynamic>> prescriptions,
+  String? id,
+) {
+  if (id == null) {
+    return null;
+  }
+
+  for (final prescription in prescriptions) {
+    if (prescription['id'] == id) {
+      return prescription;
+    }
+  }
+
+  return null;
 }
 
 class _DetailCard extends StatelessWidget {
