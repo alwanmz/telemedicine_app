@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/prescription.dart';
+import '../../models/prescription_medicine.dart';
 import '../../providers/pharmacy_order_provider.dart';
 import '../../providers/prescription_provider.dart';
 
 class RedeemMedicinePage extends ConsumerStatefulWidget {
-  final Map<String, dynamic> prescription;
+  final Prescription prescription;
 
   const RedeemMedicinePage({super.key, required this.prescription});
 
@@ -21,15 +23,13 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final prescriptionId = widget.prescription['id'] as String?;
+    final prescriptionId = widget.prescription.id;
     final currentPrescription =
         _findPrescription(ref.watch(prescriptionsProvider), prescriptionId) ??
         widget.prescription;
-    final status = currentPrescription['status'] as String? ?? 'Aktif';
-    final isRedeemable = status == 'Aktif';
+    final isRedeemable = currentPrescription.isRedeemable;
     final medicines = _buildPricedMedicines(
-      (currentPrescription['medicines'] as List<dynamic>? ?? [])
-          .cast<Map<String, dynamic>>(),
+      currentPrescription.medicines,
     );
     final subtotal = medicines.fold<int>(
       0,
@@ -63,8 +63,8 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                         'orderDate': _buildOrderDate(),
                         'paymentStatus': 'unpaid',
                         'fulfillmentStatus': 'waiting_payment',
-                        'doctorName': currentPrescription['doctorName'],
-                        'prescriptionDate': currentPrescription['date'],
+                        'doctorName': currentPrescription.doctorName,
+                        'prescriptionDate': currentPrescription.date,
                         'deliveryMethod': selectedDeliveryMethod,
                         'shippingAddress': shippingAddress,
                         'medicines': medicines,
@@ -74,11 +74,9 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                       };
 
                       ref.read(pharmacyOrdersProvider.notifier).addOrder(order);
-                      if (prescriptionId != null) {
-                        ref
-                            .read(prescriptionsProvider.notifier)
-                            .markAsCompleted(prescriptionId);
-                      }
+                      ref
+                          .read(prescriptionsProvider.notifier)
+                          .markAsCompleted(prescriptionId);
                       context.push('/pharmacy-order-detail', extra: order);
                     }
                   : null,
@@ -262,12 +260,15 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
   }
 
   List<Map<String, dynamic>> _buildPricedMedicines(
-    List<Map<String, dynamic>> medicines,
+    List<PrescriptionMedicine> medicines,
   ) {
     const prices = [25000, 18000, 32000, 22000];
 
     return medicines.asMap().entries.map((entry) {
-      return {...entry.value, 'price': prices[entry.key % prices.length]};
+      return {
+        ...entry.value.toMap(),
+        'price': prices[entry.key % prices.length],
+      };
     }).toList();
   }
 
@@ -313,16 +314,12 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
   }
 }
 
-Map<String, dynamic>? _findPrescription(
-  List<Map<String, dynamic>> prescriptions,
-  String? id,
+Prescription? _findPrescription(
+  List<Prescription> prescriptions,
+  String id,
 ) {
-  if (id == null) {
-    return null;
-  }
-
   for (final prescription in prescriptions) {
-    if (prescription['id'] == id) {
+    if (prescription.id == id) {
       return prescription;
     }
   }

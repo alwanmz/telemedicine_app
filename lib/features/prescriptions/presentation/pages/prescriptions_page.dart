@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/prescription.dart';
 import '../../providers/prescription_provider.dart';
 
 class PrescriptionsPage extends ConsumerWidget {
@@ -19,7 +20,7 @@ class PrescriptionsPage extends ConsumerWidget {
         separatorBuilder: (_, __) => const SizedBox(height: 14),
         itemBuilder: (context, index) {
           final prescription = prescriptions[index];
-          final status = prescription['status'] as String? ?? 'Aktif';
+          final status = prescription.status;
 
           return InkWell(
             borderRadius: BorderRadius.circular(24),
@@ -62,7 +63,7 @@ class PrescriptionsPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          prescription['doctorName'] as String? ?? '-',
+                          prescription.doctorName,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -71,7 +72,7 @@ class PrescriptionsPage extends ConsumerWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          prescription['date'] as String? ?? '-',
+                          prescription.date,
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF6B7280),
@@ -105,7 +106,10 @@ class _PrescriptionStatusBadge extends StatelessWidget {
     if (status == 'Aktif') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-    } else if (status == 'Selesai') {
+    } else if (status == Prescription.statusActive) {
+      backgroundColor = const Color(0xFFE9FBF6);
+      textColor = const Color(0xFF20B486);
+    } else if (status == 'Selesai' || status == Prescription.statusCompleted) {
       backgroundColor = const Color(0xFFF3F4F6);
       textColor = const Color(0xFF6B7280);
     } else {
@@ -120,7 +124,7 @@ class _PrescriptionStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        Prescription.labelForStatus(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

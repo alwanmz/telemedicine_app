@@ -327,3 +327,22 @@ Refactor the frontend to be backend-ready, starting with appointment domain mode
 - Keep the project beginner-friendly
 - Preserve existing visual behavior
 - Prepare the codebase for future Laravel API integration
+
+## Phase 2 Scope
+
+Refactor the prescription domain to be backend-ready.
+
+### Goals
+
+- Create a Prescription model
+- Create a PrescriptionMedicine model
+- Standardize prescription status values
+- Reduce direct Map<String, dynamic> usage in prescription-related flow
+- Preserve current UI and current app behavior as much as possible
+
+### Rules
+
+- Keep the refactor incremental
+- Do not rewrite unrelated features
+- Preserve the existing prescription list, detail, and redeem medicine flow
+- Keep the project beginner-friendly

@@ -2,28 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/prescription.dart';
 import '../../providers/prescription_provider.dart';
 
 class PrescriptionDetailPage extends ConsumerWidget {
-  final Map<String, dynamic> prescription;
+  final Prescription prescription;
 
   const PrescriptionDetailPage({super.key, required this.prescription});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final prescriptionId = prescription['id'] as String?;
+    final prescriptionId = prescription.id;
     final currentPrescription =
         _findPrescription(ref.watch(prescriptionsProvider), prescriptionId) ??
         prescription;
-    final doctorName = currentPrescription['doctorName'] as String? ?? '-';
-    final date = currentPrescription['date'] as String? ?? '-';
-    final status = currentPrescription['status'] as String? ?? 'Aktif';
-    final isRedeemable = status == 'Aktif';
+    final doctorName = currentPrescription.doctorName;
+    final date = currentPrescription.date;
+    final status = currentPrescription.status;
+    final isRedeemable = currentPrescription.isRedeemable;
     final actionLabel = isRedeemable ? 'Tebus Obat' : 'Resep Sudah Selesai';
-    final notes = currentPrescription['notes'] as String? ?? '-';
-    final medicines =
-        (currentPrescription['medicines'] as List<dynamic>? ?? [])
-            .cast<Map<String, dynamic>>();
+    final notes = currentPrescription.notes;
+    final medicines = currentPrescription.medicines;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Resep'), centerTitle: false),
@@ -133,7 +132,7 @@ class PrescriptionDetailPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          medicine['name'] as String? ?? '-',
+                          medicine.name,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -143,12 +142,12 @@ class PrescriptionDetailPage extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _InfoRow(
                           label: 'Dosis',
-                          value: medicine['dosage'] as String? ?? '-',
+                          value: medicine.dosage,
                         ),
                         const SizedBox(height: 6),
                         _InfoRow(
                           label: 'Frekuensi',
-                          value: medicine['frequency'] as String? ?? '-',
+                          value: medicine.frequency,
                         ),
                       ],
                     ),
@@ -176,16 +175,12 @@ class PrescriptionDetailPage extends ConsumerWidget {
   }
 }
 
-Map<String, dynamic>? _findPrescription(
-  List<Map<String, dynamic>> prescriptions,
-  String? id,
+Prescription? _findPrescription(
+  List<Prescription> prescriptions,
+  String id,
 ) {
-  if (id == null) {
-    return null;
-  }
-
   for (final prescription in prescriptions) {
-    if (prescription['id'] == id) {
+    if (prescription.id == id) {
       return prescription;
     }
   }
@@ -272,7 +267,10 @@ class _PrescriptionStatusBadge extends StatelessWidget {
     if (status == 'Aktif') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-    } else if (status == 'Selesai') {
+    } else if (status == Prescription.statusActive) {
+      backgroundColor = const Color(0xFFE9FBF6);
+      textColor = const Color(0xFF20B486);
+    } else if (status == 'Selesai' || status == Prescription.statusCompleted) {
       backgroundColor = const Color(0xFFF3F4F6);
       textColor = const Color(0xFF6B7280);
     } else {
@@ -287,7 +285,7 @@ class _PrescriptionStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        Prescription.labelForStatus(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
