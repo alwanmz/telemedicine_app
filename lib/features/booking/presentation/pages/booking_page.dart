@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/appointment.dart';
 import '../../providers/appointment_provider.dart';
 
 class BookingPage extends ConsumerStatefulWidget {
@@ -76,27 +77,29 @@ class _BookingPageState extends ConsumerState<BookingPage> {
                     DateTime.now().millisecondsSinceEpoch.toString();
                 final invoiceNumber = _buildInvoiceNumber(appointmentId);
 
-                final appointment = {
-                  'id': appointmentId,
-                  'doctorName': doctorName,
-                  'specialization': specialization,
-                  'hospital': hospitalName,
-                  'date': selectedDate,
-                  'time': selectedTime,
-                  'consultationType': selectedConsultationType,
-                  'patientType': selectedPatientType,
-                  'complaint': complaintController.text.trim(),
-                  'allergyHistory': allergyHistoryController.text.trim(),
-                  'bloodPressure': bloodPressureController.text.trim(),
-                  'bodyTemperature': bodyTemperatureController.text.trim(),
-                  'weight': weightController.text.trim(),
-                  'height': heightController.text.trim(),
-                  'paymentMethod': selectedPaymentMethod,
-                  'paymentStatus': _resolvePaymentStatus(selectedPaymentMethod),
-                  'invoiceNumber': invoiceNumber,
-                  'totalPrice': 'Rp 80.000',
-                  'status': 'Terjadwal',
-                };
+                final appointment = Appointment(
+                  id: appointmentId,
+                  doctorName: doctorName,
+                  specialization: specialization,
+                  hospital: hospitalName,
+                  date: selectedDate,
+                  time: selectedTime,
+                  consultationType: selectedConsultationType,
+                  patientType: selectedPatientType,
+                  complaint: complaintController.text.trim(),
+                  allergyHistory: allergyHistoryController.text.trim(),
+                  bloodPressure: bloodPressureController.text.trim(),
+                  bodyTemperature: bodyTemperatureController.text.trim(),
+                  weight: weightController.text.trim(),
+                  height: heightController.text.trim(),
+                  paymentMethod: selectedPaymentMethod,
+                  paymentStatus: Appointment.resolveInitialPaymentStatus(
+                    selectedPaymentMethod,
+                  ),
+                  invoiceNumber: invoiceNumber,
+                  totalPrice: 'Rp 80.000',
+                  status: Appointment.statusScheduled,
+                );
 
                 ref
                     .read(appointmentsProvider.notifier)
@@ -411,11 +414,6 @@ class _BookingPageState extends ConsumerState<BookingPage> {
         ],
       ),
     );
-  }
-
-  String _resolvePaymentStatus(String paymentMethod) {
-    if (paymentMethod == 'Tunai') return 'unpaid';
-    return 'pending';
   }
 
   String _buildInvoiceNumber(String appointmentId) {

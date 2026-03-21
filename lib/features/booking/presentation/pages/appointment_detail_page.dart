@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../models/appointment.dart';
 import '../../providers/appointment_provider.dart';
 
 class AppointmentDetailPage extends ConsumerWidget {
@@ -11,9 +12,13 @@ class AppointmentDetailPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appointments = ref.watch(appointmentsProvider);
 
-    final Map<String, dynamic>? appointment = appointments
-        .cast<Map<String, dynamic>?>()
-        .firstWhere((item) => item?['id'] == appointmentId, orElse: () => null);
+    Appointment? appointment;
+    for (final item in appointments) {
+      if (item.id == appointmentId) {
+        appointment = item;
+        break;
+      }
+    }
 
     if (appointment == null) {
       return Scaffold(
@@ -27,32 +32,30 @@ class AppointmentDetailPage extends ConsumerWidget {
       );
     }
 
-    final id = appointment['id'] as String? ?? '';
-    final doctorName = appointment['doctorName'] as String? ?? '-';
-    final specialization = appointment['specialization'] as String? ?? '-';
-    final hospitalName = appointment['hospital'] as String? ?? '-';
-    final date = appointment['date'] as String? ?? '-';
-    final time = appointment['time'] as String? ?? '-';
-    final consultationType = appointment['consultationType'] as String? ?? '-';
-    final patientType = appointment['patientType'] as String? ?? '-';
-    final complaint = appointment['complaint'] as String? ?? '-';
-    final allergyHistory = appointment['allergyHistory'] as String? ?? '-';
-    final bloodPressure = appointment['bloodPressure'] as String? ?? '-';
-    final bodyTemperature = appointment['bodyTemperature'] as String? ?? '-';
-    final weight = appointment['weight'] as String? ?? '-';
-    final height = appointment['height'] as String? ?? '-';
-    final paymentMethod = appointment['paymentMethod'] as String? ?? '-';
-    final invoiceNumber = appointment['invoiceNumber'] as String? ?? '-';
-    final paymentStatus = _resolvePaymentStatus(
-      appointment['paymentStatus'] as String?,
-      paymentMethod,
-    );
-    final totalPrice = appointment['totalPrice'] as String? ?? 'Rp 80.000';
-    final status = appointment['status'] as String? ?? 'Terjadwal';
+    final id = appointment.id;
+    final doctorName = appointment.doctorName;
+    final specialization = appointment.specialization;
+    final hospitalName = appointment.hospital;
+    final date = appointment.date;
+    final time = appointment.time;
+    final consultationType = appointment.consultationType;
+    final patientType = appointment.patientType;
+    final complaint = appointment.complaint;
+    final allergyHistory = appointment.allergyHistory;
+    final bloodPressure = appointment.bloodPressure;
+    final bodyTemperature = appointment.bodyTemperature;
+    final weight = appointment.weight;
+    final height = appointment.height;
+    final paymentMethod = appointment.paymentMethod;
+    final invoiceNumber = appointment.invoiceNumber;
+    final paymentStatus = appointment.paymentStatus;
+    final totalPrice = appointment.totalPrice;
+    final status = appointment.status;
+    final statusLabel = appointment.statusLabel;
 
-    final isCancelled = status == 'Dibatalkan';
-    final canPayNow = paymentStatus == 'unpaid';
-    final canMarkAsPaid = paymentStatus == 'pending';
+    final isCancelled = status == Appointment.statusCancelled;
+    final canPayNow = paymentStatus == Appointment.paymentStatusUnpaid;
+    final canMarkAsPaid = paymentStatus == Appointment.paymentStatusPending;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Janji'), centerTitle: false),
@@ -247,7 +250,7 @@ class AppointmentDetailPage extends ConsumerWidget {
               _DetailRow(label: 'Tipe Pasien', value: patientType),
               _DetailRow(
                 label: 'Status',
-                value: status,
+                value: statusLabel,
                 valueColor: _statusColor(status),
               ),
             ],
@@ -385,18 +388,9 @@ class AppointmentDetailPage extends ConsumerWidget {
   }
 
   Color _statusColor(String status) {
-    if (status == 'Dibatalkan') return const Color(0xFFDC2626);
-    if (status == 'Dijadwalkan Ulang') return const Color(0xFFEA580C);
+    if (status == Appointment.statusCancelled) return const Color(0xFFDC2626);
+    if (status == Appointment.statusRescheduled) return const Color(0xFFEA580C);
     return const Color(0xFF20B486);
-  }
-
-  String _resolvePaymentStatus(String? rawStatus, String paymentMethod) {
-    if (rawStatus != null && rawStatus.isNotEmpty) return rawStatus;
-    if (paymentMethod == 'Tunai') return 'unpaid';
-    if (paymentMethod == 'Transfer Bank' || paymentMethod == 'E-Wallet') {
-      return 'pending';
-    }
-    return '-';
   }
 }
 
@@ -513,19 +507,19 @@ class _PaymentStatusBadge extends StatelessWidget {
     if (status == 'unpaid') {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
-      label = 'Belum Dibayar';
+      label = Appointment.labelForPaymentStatus(status);
     } else if (status == 'paid') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-      label = 'Lunas';
+      label = Appointment.labelForPaymentStatus(status);
     } else if (status == 'pending') {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
-      label = 'Menunggu';
+      label = Appointment.labelForPaymentStatus(status);
     } else {
       backgroundColor = const Color(0xFFF3F4F6);
       textColor = const Color(0xFF6B7280);
-      label = '-';
+      label = Appointment.labelForPaymentStatus(status);
     }
 
     return Container(

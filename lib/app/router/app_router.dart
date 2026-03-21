@@ -10,6 +10,7 @@ import '../../features/chat/presentation/pages/chat_room_page.dart';
 import '../../features/doctors/presentation/pages/doctor_detail_page.dart';
 import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/booking/models/appointment.dart';
 import '../../features/prescriptions/presentation/pages/pharmacy_order_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/pharmacy_orders_page.dart';
 import '../../features/prescriptions/presentation/pages/prescription_detail_page.dart';
@@ -46,7 +47,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/booking-success',
       builder: (context, state) {
-        final appointment = state.extra as Map<String, dynamic>;
+        final appointment = state.extra as Appointment;
         return BookingSuccessPage(appointment: appointment);
       },
     ),

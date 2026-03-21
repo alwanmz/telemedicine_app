@@ -1,38 +1,40 @@
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../models/appointment.dart';
+
 final appointmentsProvider =
-    StateNotifierProvider<AppointmentsNotifier, List<Map<String, dynamic>>>(
+    StateNotifierProvider<AppointmentsNotifier, List<Appointment>>(
       (ref) => AppointmentsNotifier(),
     );
 
-class AppointmentsNotifier extends StateNotifier<List<Map<String, dynamic>>> {
+class AppointmentsNotifier extends StateNotifier<List<Appointment>> {
   AppointmentsNotifier()
     : super([
-        {
-          'id': 'apt_1',
-          'doctorName': 'Dr. Amanda Putri, Sp.PD',
-          'specialization': 'Penyakit Dalam',
-          'hospital': 'RS Sehat Sentosa',
-          'date': 'Senin, 18 Maret 2026',
-          'time': '09:30',
-          'consultationType': 'Chat',
-          'complaint': 'Kontrol rutin tekanan darah.',
-          'paymentMethod': 'Tunai',
-          'paymentStatus': 'unpaid',
-          'invoiceNumber': 'INV-APT00001',
-          'totalPrice': 'Rp 80.000',
-          'status': 'Terjadwal',
-        },
+        const Appointment(
+          id: 'apt_1',
+          doctorName: 'Dr. Amanda Putri, Sp.PD',
+          specialization: 'Penyakit Dalam',
+          hospital: 'RS Sehat Sentosa',
+          date: 'Senin, 18 Maret 2026',
+          time: '09:30',
+          consultationType: 'Chat',
+          complaint: 'Kontrol rutin tekanan darah.',
+          paymentMethod: 'Tunai',
+          paymentStatus: Appointment.paymentStatusUnpaid,
+          invoiceNumber: 'INV-APT00001',
+          totalPrice: 'Rp 80.000',
+          status: Appointment.statusScheduled,
+        ),
       ]);
 
-  void addAppointment(Map<String, dynamic> appointment) {
+  void addAppointment(Appointment appointment) {
     state = [appointment, ...state];
   }
 
   void cancelAppointment(String id) {
     state = state.map((item) {
-      if (item['id'] == id) {
-        return {...item, 'status': 'Dibatalkan'};
+      if (item.id == id) {
+        return item.copyWith(status: Appointment.statusCancelled);
       }
       return item;
     }).toList();
@@ -44,13 +46,12 @@ class AppointmentsNotifier extends StateNotifier<List<Map<String, dynamic>>> {
     required String newTime,
   }) {
     state = state.map((item) {
-      if (item['id'] == id) {
-        return {
-          ...item,
-          'date': newDate,
-          'time': newTime,
-          'status': 'Dijadwalkan Ulang',
-        };
+      if (item.id == id) {
+        return item.copyWith(
+          date: newDate,
+          time: newTime,
+          status: Appointment.statusRescheduled,
+        );
       }
       return item;
     }).toList();
@@ -58,8 +59,8 @@ class AppointmentsNotifier extends StateNotifier<List<Map<String, dynamic>>> {
 
   void markPaymentAsPaid(String id) {
     state = state.map((item) {
-      if (item['id'] == id) {
-        return {...item, 'paymentStatus': 'paid'};
+      if (item.id == id) {
+        return item.copyWith(paymentStatus: Appointment.paymentStatusPaid);
       }
       return item;
     }).toList();

@@ -307,3 +307,23 @@ Separate pharmacy order payment status from fulfillment status.
 - Preserve current medicine redemption and pharmacy order flow
 - Make minimal, high-confidence changes only
 - Do not refactor unrelated files
+
+## New Goal
+
+Refactor the frontend to be backend-ready, starting with appointment domain models and status standardization.
+
+## Phase 1 Scope
+
+- Create an Appointment model
+- Standardize appointment status values
+- Standardize payment status values
+- Reduce direct Map<String, dynamic> usage in appointment-related flow
+- Keep current UI and app behavior unchanged as much as possible
+
+## Rules
+
+- Prefer minimal, incremental refactors
+- Do not rewrite the whole app
+- Keep the project beginner-friendly
+- Preserve existing visual behavior
+- Prepare the codebase for future Laravel API integration

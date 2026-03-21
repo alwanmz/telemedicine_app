@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/appointment.dart';
 import '../../providers/appointment_provider.dart';
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -27,18 +28,18 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
     final filterCounts = <String, int>{
       'Semua': appointments.length,
       'Terjadwal': appointments
-          .where((item) => item['status'] == 'Terjadwal')
+          .where((item) => item.status == Appointment.statusScheduled)
           .length,
       'Dijadwalkan Ulang': appointments
-          .where((item) => item['status'] == 'Dijadwalkan Ulang')
+          .where((item) => item.status == Appointment.statusRescheduled)
           .length,
       'Dibatalkan': appointments
-          .where((item) => item['status'] == 'Dibatalkan')
+          .where((item) => item.status == Appointment.statusCancelled)
           .length,
     };
     final filteredAppointments = appointments.where((item) {
       if (_selectedFilter == 'Semua') return true;
-      return item['status'] == _selectedFilter;
+      return item.status == _statusForFilter(_selectedFilter);
     }).toList();
 
     return Scaffold(
@@ -144,7 +145,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                               onTap: () {
                                 context.push(
                                   '/appointment-detail',
-                                  extra: item['id'] as String,
+                                  extra: item.id,
                                 );
                               },
                               child: Container(
@@ -188,8 +189,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            item['doctorName'] as String? ??
-                                                '-',
+                                            item.doctorName,
                                             style: const TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
@@ -198,8 +198,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            item['specialization'] as String? ??
-                                                '-',
+                                            item.specialization,
                                             style: const TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
@@ -208,7 +207,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                           ),
                                           const SizedBox(height: 6),
                                           Text(
-                                            '${item['date']} \u2022 ${item['time']}',
+                                            '${item.date} \u2022 ${item.time}',
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Color(0xFF6B7280),
@@ -216,9 +215,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                           ),
                                           const SizedBox(height: 6),
                                           Text(
-                                            item['consultationType']
-                                                    as String? ??
-                                                '-',
+                                            item.consultationType,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Color(0xFF6B7280),
@@ -228,13 +225,15 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                           Builder(
                                             builder: (context) {
                                               final status =
-                                                  item['status'] as String? ??
-                                                  'Terjadwal';
+                                                  item.status;
+                                              final statusLabel =
+                                                  item.statusLabel;
 
                                               Color bgColor;
                                               Color textColor;
 
-                                              if (status == 'Dibatalkan') {
+                                              if (status ==
+                                                  Appointment.statusCancelled) {
                                                 bgColor = const Color(
                                                   0xFFFEF2F2,
                                                 );
@@ -242,7 +241,8 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                                   0xFFDC2626,
                                                 );
                                               } else if (status ==
-                                                  'Dijadwalkan Ulang') {
+                                                  Appointment
+                                                      .statusRescheduled) {
                                                 bgColor = const Color(
                                                   0xFFFFF7ED,
                                                 );
@@ -272,7 +272,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
                                                       ),
                                                 ),
                                                 child: Text(
-                                                  status,
+                                                  statusLabel,
                                                   style: TextStyle(
                                                     color: textColor,
                                                     fontSize: 11,
@@ -295,6 +295,19 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage> {
               ],
             ),
     );
+  }
+
+  String? _statusForFilter(String filter) {
+    if (filter == 'Terjadwal') {
+      return Appointment.statusScheduled;
+    }
+    if (filter == 'Dijadwalkan Ulang') {
+      return Appointment.statusRescheduled;
+    }
+    if (filter == 'Dibatalkan') {
+      return Appointment.statusCancelled;
+    }
+    return null;
   }
 }
 

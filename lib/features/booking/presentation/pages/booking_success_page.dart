@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/appointment.dart';
+
 class BookingSuccessPage extends StatelessWidget {
-  final Map<String, dynamic> appointment;
+  final Appointment appointment;
 
   const BookingSuccessPage({super.key, required this.appointment});
 
   @override
   Widget build(BuildContext context) {
-    final doctorName = appointment['doctorName'] as String? ?? '-';
-    final date = appointment['date'] as String? ?? '-';
-    final time = appointment['time'] as String? ?? '-';
+    final doctorName = appointment.doctorName;
+    final date = appointment.date;
+    final time = appointment.time;
 
     return Scaffold(
       appBar: AppBar(
@@ -86,12 +88,12 @@ class BookingSuccessPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     _SummaryRow(
                       label: 'Metode',
-                      value: appointment['consultationType'] as String? ?? '-',
+                      value: appointment.consultationType,
                     ),
                     const SizedBox(height: 10),
                     _SummaryRow(
                       label: 'Status',
-                      value: appointment['status'] as String? ?? 'Terjadwal',
+                      value: appointment.statusLabel,
                       valueColor: const Color(0xFF20B486),
                     ),
                   ],
@@ -105,7 +107,7 @@ class BookingSuccessPage extends StatelessWidget {
                   onPressed: () {
                     context.push(
                       '/appointment-detail',
-                      extra: appointment['id'] as String,
+                      extra: appointment.id,
                     );
                   },
                   style: ElevatedButton.styleFrom(
