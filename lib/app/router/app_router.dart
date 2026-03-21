@@ -18,6 +18,16 @@ import '../../features/prescriptions/presentation/pages/pharmacy_orders_page.dar
 import '../../features/prescriptions/presentation/pages/prescription_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/prescriptions_page.dart';
 import '../../features/prescriptions/presentation/pages/redeem_medicine_page.dart';
+import '../../features/profile/models/user_address.dart';
+import '../../features/profile/models/family_member.dart';
+import '../../features/profile/presentation/pages/address_form_page.dart';
+import '../../features/profile/presentation/pages/address_list_page.dart';
+import '../../features/profile/presentation/pages/family_member_form_page.dart';
+import '../../features/profile/presentation/pages/family_members_page.dart';
+import '../../features/profile/presentation/pages/help_page.dart';
+import '../../features/profile/presentation/pages/notifications_page.dart';
+import '../../features/profile/presentation/pages/payment_methods_page.dart';
+import '../../features/profile/presentation/pages/personal_info_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../shared/presentation/pages/main_shell_page.dart';
 import '../../features/booking/presentation/pages/appointments_page.dart';
@@ -94,6 +104,44 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) {
         final order = state.extra as PharmacyOrder;
         return PharmacyOrderDetailPage(order: order);
+      },
+    ),
+    GoRoute(
+      path: '/addresses',
+      builder: (context, state) => const AddressListPage(),
+    ),
+    GoRoute(
+      path: '/address-form',
+      builder: (context, state) {
+        final address = state.extra as UserAddress?;
+        return AddressFormPage(address: address);
+      },
+    ),
+    GoRoute(
+      path: '/payment-methods',
+      builder: (context, state) => const PaymentMethodsPage(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsPage(),
+    ),
+    GoRoute(
+      path: '/help',
+      builder: (context, state) => const HelpPage(),
+    ),
+    GoRoute(
+      path: '/personal-info',
+      builder: (context, state) => const PersonalInfoPage(),
+    ),
+    GoRoute(
+      path: '/family-members',
+      builder: (context, state) => const FamilyMembersPage(),
+    ),
+    GoRoute(
+      path: '/family-member-form',
+      builder: (context, state) {
+        final member = state.extra as FamilyMember?;
+        return FamilyMemberFormPage(member: member);
       },
     ),
     GoRoute(

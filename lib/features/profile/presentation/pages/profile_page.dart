@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class ProfilePage extends StatelessWidget {
+import '../../models/user_profile.dart';
+import '../../providers/profile_provider.dart';
+
+class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final menus = [
-      {'title': 'Data Pribadi'},
-      {'title': 'Keluarga'},
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(profileProvider);
+    final menus = <Map<String, dynamic>>[
+      {'title': 'Data Pribadi', 'route': '/personal-info'},
+      {'title': 'Keluarga', 'route': '/family-members'},
       {'title': 'Resep Saya', 'route': '/prescriptions'},
       {'title': 'Pesanan Obat Saya', 'route': '/pharmacy-orders'},
-      {'title': 'Metode Pembayaran'},
-      {'title': 'Notifikasi'},
-      {'title': 'Bantuan'},
-      {'title': 'Keluar'},
+      {'title': 'Alamat Saya', 'route': '/addresses'},
+      {'title': 'Metode Pembayaran', 'route': '/payment-methods'},
+      {'title': 'Notifikasi', 'route': '/notifications'},
+      {'title': 'Bantuan', 'route': '/help'},
+      {'title': 'Keluar', 'route': '/login', 'replace': true},
     ];
 
     return Scaffold(
@@ -29,22 +35,34 @@ class ProfilePage extends StatelessWidget {
               borderRadius: BorderRadius.circular(24),
               border: Border.all(color: const Color(0xFFE5E7EB)),
             ),
-            child: const Column(
+            child: Column(
               children: [
                 CircleAvatar(
                   radius: 34,
-                  backgroundColor: Color(0xFFEAF4FF),
-                  child: Icon(Icons.person, size: 34, color: Color(0xFF2F80ED)),
+                  backgroundColor: _backgroundColorForVariant(
+                    profile.photoVariant,
+                  ),
+                  child: Icon(
+                    _iconForVariant(profile.photoVariant),
+                    size: 34,
+                    color: Colors.white,
+                  ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Text(
-                  'Alwan Maulana',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                  profile.fullName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'alwan@example.com',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                  profile.email,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF6B7280),
+                  ),
                 ),
               ],
             ),
@@ -58,7 +76,12 @@ class ProfilePage extends StatelessWidget {
                 onTap: () {
                   final route = menu['route'];
                   if (route != null) {
-                    context.push(route);
+                    final shouldReplace = menu['replace'] == true;
+                    if (shouldReplace) {
+                      context.go(route);
+                    } else {
+                      context.push(route);
+                    }
                   }
                 },
                 child: Container(
@@ -95,5 +118,25 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  static Color _backgroundColorForVariant(String variant) {
+    if (variant == UserProfile.photoVariantGreen) {
+      return const Color(0xFF20B486);
+    }
+    if (variant == UserProfile.photoVariantOrange) {
+      return const Color(0xFFEA580C);
+    }
+    return const Color(0xFF2F80ED);
+  }
+
+  static IconData _iconForVariant(String variant) {
+    if (variant == UserProfile.photoVariantGreen) {
+      return Icons.face_rounded;
+    }
+    if (variant == UserProfile.photoVariantOrange) {
+      return Icons.sentiment_very_satisfied_rounded;
+    }
+    return Icons.person_rounded;
   }
 }

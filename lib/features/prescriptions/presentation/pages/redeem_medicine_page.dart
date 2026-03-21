@@ -6,9 +6,9 @@ import '../../models/pharmacy_order.dart';
 import '../../models/pharmacy_order_item.dart';
 import '../../models/prescription.dart';
 import '../../models/prescription_medicine.dart';
-import '../../models/shipping_address.dart';
 import '../../providers/pharmacy_order_provider.dart';
 import '../../providers/prescription_provider.dart';
+import '../../../profile/providers/address_provider.dart';
 
 class RedeemMedicinePage extends ConsumerStatefulWidget {
   final Prescription prescription;
@@ -37,11 +37,9 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
     final subtotal = medicines.fold<int>(0, (sum, item) => sum + item.price);
     final shippingCost = selectedDeliveryMethod == 'Same Day' ? 18000 : 9000;
     final total = subtotal + shippingCost;
-    const shippingAddress = ShippingAddress(
-      recipient: 'Alwan Maulana',
-      phone: '0812-3456-7890',
-      address: 'Jl. Melati No. 18, Cempaka Putih, Jakarta Pusat',
-    );
+    final defaultAddress = ref.watch(defaultAddressProvider);
+    final shippingAddress = defaultAddress?.toShippingAddress();
+    final canSubmit = isRedeemable && shippingAddress != null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tebus Obat'), centerTitle: false),
@@ -52,7 +50,7 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
           child: SizedBox(
             height: 54,
             child: ElevatedButton(
-              onPressed: isRedeemable
+              onPressed: canSubmit
                   ? () {
                       final orderId = DateTime.now().millisecondsSinceEpoch
                           .toString();
@@ -152,35 +150,99 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
             ),
           ),
           const SizedBox(height: 14),
-          const _SectionCard(
+          _SectionCard(
             title: 'Alamat Pengiriman',
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Alwan Maulana',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
+            child: defaultAddress == null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Belum ada alamat utama',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Tambahkan atau pilih alamat utama dari profil sebelum menebus obat.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          height: 1.5,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      OutlinedButton(
+                        onPressed: () {
+                          context.push('/addresses');
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2F80ED),
+                          side: const BorderSide(color: Color(0xFFBFDBFE)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text('Kelola Alamat'),
+                      ),
+                    ],
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              defaultAddress.label,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF2F80ED),
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              context.push('/addresses');
+                            },
+                            child: const Text('Ubah'),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        defaultAddress.recipient,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        defaultAddress.phone,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF4B5563),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        defaultAddress.address,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          height: 1.5,
+                          color: Color(0xFF6B7280),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  '0812-3456-7890',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF4B5563)),
-                ),
-                SizedBox(height: 6),
-                Text(
-                  'Jl. Melati No. 18, Cempaka Putih, Jakarta Pusat',
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.5,
-                    color: Color(0xFF6B7280),
-                  ),
-                ),
-              ],
-            ),
           ),
           const SizedBox(height: 14),
           _SectionCard(

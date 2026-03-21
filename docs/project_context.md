@@ -367,3 +367,82 @@ Refactor the pharmacy order domain to be backend-ready.
 - Do not rewrite unrelated features
 - Preserve the existing redeem medicine, pharmacy order list, and pharmacy order detail flow
 - Keep the project beginner-friendly
+
+## Sprint Profile 1 - Batch 2
+
+Implement:
+
+- Address Management
+- Payment Methods
+
+### Address Requirements
+
+- Add address list page
+- Add add/edit address page
+- Support one default address
+- Connect default address to medicine redemption flow
+
+### Payment Method Requirements
+
+- Add payment methods page
+- Show saved payment methods in dummy local state
+- Support one default payment method
+- Keep it ready for future payment gateway integration
+
+## Sprint Profile 1 - Batch 1
+
+Implement patient profile management pages:
+
+- Personal Info
+- Family Members
+
+### Personal Info Requirements
+
+- Add personal info page
+- Show and edit:
+  - profile photo (local dummy state only)
+  - full name
+  - email
+  - phone number
+  - birth date
+  - gender
+
+### Family Members Requirements
+
+- Add family members page
+- Show list of family members
+- Add/edit family member entries
+- Include relationship field
+
+### Rules
+
+- Keep current visual style
+- Use local dummy state/provider for now
+- Make minimal, high-confidence changes only
+- Keep it beginner-friendly
+
+## Sprint Profile 1 - Batch 3
+
+Implement:
+
+- Notifications page
+- Help page
+- Finalize profile menu navigation
+
+### Notifications Requirements
+
+- Add notifications page
+- Show dummy notification items for:
+  - appointments
+  - prescriptions
+  - pharmacy orders
+
+### Help Requirements
+
+- Add help page
+- Show FAQ items
+- Show contact/help center section
+
+### Profile Page Requirement
+
+- Ensure all current profile menu items navigate to working pages
