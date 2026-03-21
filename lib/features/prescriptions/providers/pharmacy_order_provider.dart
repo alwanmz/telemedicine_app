@@ -11,6 +11,33 @@ class PharmacyOrdersNotifier extends StateNotifier<List<Map<String, dynamic>>> {
   void addOrder(Map<String, dynamic> order) {
     state = [order, ...state];
   }
+
+  void markOrderAsPaid(String id) {
+    state = state.map((order) {
+      if (order['id'] != id) {
+        return order;
+      }
+
+      return {
+        ...order,
+        'paymentStatus': 'paid',
+        'fulfillmentStatus': 'processing',
+      };
+    }).toList();
+  }
+
+  void updateFulfillmentStatus({
+    required String id,
+    required String fulfillmentStatus,
+  }) {
+    state = state.map((order) {
+      if (order['id'] != id) {
+        return order;
+      }
+
+      return {...order, 'fulfillmentStatus': fulfillmentStatus};
+    }).toList();
+  }
 }
 
 final List<Map<String, dynamic>> _dummyPharmacyOrders = [
@@ -18,7 +45,8 @@ final List<Map<String, dynamic>> _dummyPharmacyOrders = [
     'id': 'ord_2',
     'orderNumber': 'ORD-24031502',
     'orderDate': '15 Maret 2026',
-    'status': 'Diproses Farmasi',
+    'paymentStatus': 'paid',
+    'fulfillmentStatus': 'processing',
     'doctorName': 'Dr. Budi Santoso, Sp.A',
     'prescriptionDate': '15 Maret 2026',
     'deliveryMethod': 'Same Day',
@@ -49,7 +77,8 @@ final List<Map<String, dynamic>> _dummyPharmacyOrders = [
     'id': 'ord_1',
     'orderNumber': 'ORD-24031001',
     'orderDate': '10 Maret 2026',
-    'status': 'Dikirim',
+    'paymentStatus': 'paid',
+    'fulfillmentStatus': 'shipped',
     'doctorName': 'Dr. Citra Lestari, Sp.KK',
     'prescriptionDate': '10 Maret 2026',
     'deliveryMethod': 'Reguler',

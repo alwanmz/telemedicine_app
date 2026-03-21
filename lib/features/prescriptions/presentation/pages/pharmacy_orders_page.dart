@@ -21,8 +21,8 @@ class PharmacyOrdersPage extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 14),
               itemBuilder: (context, index) {
                 final order = orders[index];
-                final status =
-                    order['status'] as String? ?? 'Menunggu Pembayaran';
+                final fulfillmentStatus =
+                    order['fulfillmentStatus'] as String? ?? 'waiting_payment';
 
                 return InkWell(
                   borderRadius: BorderRadius.circular(24),
@@ -90,7 +90,9 @@ class PharmacyOrdersPage extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(height: 12),
-                              _OrderStatusBadge(status: status),
+                              _FulfillmentStatusBadge(
+                                status: fulfillmentStatus,
+                              ),
                             ],
                           ),
                         ),
@@ -170,28 +172,34 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _OrderStatusBadge extends StatelessWidget {
+class _FulfillmentStatusBadge extends StatelessWidget {
   final String status;
 
-  const _OrderStatusBadge({required this.status});
+  const _FulfillmentStatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     late final Color textColor;
 
-    if (status == 'Selesai') {
+    late final String label;
+
+    if (status == 'completed') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-    } else if (status == 'Dikirim') {
+      label = 'Selesai';
+    } else if (status == 'shipped') {
       backgroundColor = const Color(0xFFEAF4FF);
       textColor = const Color(0xFF2F80ED);
-    } else if (status == 'Diproses Farmasi') {
+      label = 'Dikirim';
+    } else if (status == 'processing') {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
+      label = 'Diproses Farmasi';
     } else {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
+      label = 'Menunggu Pembayaran';
     }
 
     return Container(
@@ -201,7 +209,7 @@ class _OrderStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

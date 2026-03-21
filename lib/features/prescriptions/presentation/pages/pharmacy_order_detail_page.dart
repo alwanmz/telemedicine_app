@@ -1,24 +1,83 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PharmacyOrderDetailPage extends StatelessWidget {
+import '../../providers/pharmacy_order_provider.dart';
+
+class PharmacyOrderDetailPage extends ConsumerWidget {
   final Map<String, dynamic> order;
 
   const PharmacyOrderDetailPage({super.key, required this.order});
 
   @override
-  Widget build(BuildContext context) {
-    final orderNumber = order['orderNumber'] as String? ?? '-';
-    final status = order['status'] as String? ?? 'Menunggu Pembayaran';
-    final doctorName = order['doctorName'] as String? ?? '-';
-    final prescriptionDate = order['prescriptionDate'] as String? ?? '-';
-    final deliveryMethod = order['deliveryMethod'] as String? ?? '-';
+  Widget build(BuildContext context, WidgetRef ref) {
+    final orderId = order['id'] as String?;
+    final orders = ref.watch(pharmacyOrdersProvider);
+    final currentOrder = _findOrder(orders, orderId) ?? order;
+    final orderNumber = currentOrder['orderNumber'] as String? ?? '-';
+    final paymentStatus =
+        currentOrder['paymentStatus'] as String? ?? 'unpaid';
+    final fulfillmentStatus =
+        currentOrder['fulfillmentStatus'] as String? ?? 'waiting_payment';
+    final doctorName = currentOrder['doctorName'] as String? ?? '-';
+    final prescriptionDate = currentOrder['prescriptionDate'] as String? ?? '-';
+    final deliveryMethod = currentOrder['deliveryMethod'] as String? ?? '-';
     final shippingAddress =
-        order['shippingAddress'] as Map<String, dynamic>? ?? const {};
+        currentOrder['shippingAddress'] as Map<String, dynamic>? ?? const {};
     final medicines =
-        (order['medicines'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
+        (currentOrder['medicines'] as List<dynamic>? ?? [])
+            .cast<Map<String, dynamic>>();
+    final actionLabel = _actionLabel(fulfillmentStatus);
+    final nextStatus = _nextStatus(fulfillmentStatus);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Lacak Pesanan'), centerTitle: false),
+      bottomNavigationBar:
+          orderId == null || actionLabel == null || nextStatus == null
+          ? null
+          : SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                child: SizedBox(
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      final notifier = ref.read(pharmacyOrdersProvider.notifier);
+
+                      if (fulfillmentStatus == 'waiting_payment') {
+                        notifier.markOrderAsPaid(orderId!);
+                      } else {
+                        notifier.updateFulfillmentStatus(
+                          id: orderId!,
+                          fulfillmentStatus: nextStatus!,
+                        );
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Status pesanan berhasil diperbarui'),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2F80ED),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                    ),
+                    child: Text(
+                      actionLabel!,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
@@ -61,7 +120,14 @@ class PharmacyOrderDetailPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      _OrderStatusBadge(status: status),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _PaymentStatusBadge(status: paymentStatus),
+                          _FulfillmentStatusBadge(status: fulfillmentStatus),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -70,14 +136,30 @@ class PharmacyOrderDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           _SectionCard(
-            title: 'Status Pesanan',
+            title: 'Status Order',
+            child: Column(
+              children: [
+                _StatusRow(
+                  label: 'Pembayaran',
+                  child: _PaymentStatusBadge(status: paymentStatus),
+                ),
+                const SizedBox(height: 12),
+                _StatusRow(
+                  label: 'Pemenuhan',
+                  child: _FulfillmentStatusBadge(status: fulfillmentStatus),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 14),
+          _SectionCard(
+            title: 'Status Pemenuhan',
             child: Column(
               children: _statuses.map((item) {
-                final currentIndex = _statuses.indexOf(status);
+                final currentIndex = _statuses.indexOf(fulfillmentStatus);
                 final index = _statuses.indexOf(item);
-                final isActive = item == status;
-                final isPassed =
-                    currentIndex != -1 && index < currentIndex;
+                final isActive = item == fulfillmentStatus;
+                final isPassed = currentIndex != -1 && index < currentIndex;
 
                 return Padding(
                   padding: EdgeInsets.only(bottom: item == _statuses.last ? 0 : 12),
@@ -108,7 +190,7 @@ class PharmacyOrderDetailPage extends StatelessWidget {
                         child: Padding(
                           padding: const EdgeInsets.only(top: 2),
                           child: Text(
-                            item,
+                            _fulfillmentStatusLabel(item),
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight:
@@ -213,11 +295,67 @@ class PharmacyOrderDetailPage extends StatelessWidget {
   }
 
   static const List<String> _statuses = [
-    'Menunggu Pembayaran',
-    'Diproses Farmasi',
-    'Dikirim',
-    'Selesai',
+    'waiting_payment',
+    'processing',
+    'shipped',
+    'completed',
   ];
+
+  static String? _actionLabel(String status) {
+    if (status == 'waiting_payment') {
+      return 'Tandai Dibayar';
+    }
+    if (status == 'processing') {
+      return 'Tandai Dikirim';
+    }
+    if (status == 'shipped') {
+      return 'Tandai Selesai';
+    }
+    return null;
+  }
+
+  static String? _nextStatus(String status) {
+    if (status == 'waiting_payment') {
+      return 'processing';
+    }
+    if (status == 'processing') {
+      return 'shipped';
+    }
+    if (status == 'shipped') {
+      return 'completed';
+    }
+    return null;
+  }
+
+  static String _fulfillmentStatusLabel(String status) {
+    if (status == 'completed') {
+      return 'Selesai';
+    }
+    if (status == 'shipped') {
+      return 'Dikirim';
+    }
+    if (status == 'processing') {
+      return 'Diproses Farmasi';
+    }
+    return 'Menunggu Pembayaran';
+  }
+}
+
+Map<String, dynamic>? _findOrder(
+  List<Map<String, dynamic>> orders,
+  String? orderId,
+) {
+  if (orderId == null) {
+    return null;
+  }
+
+  for (final item in orders) {
+    if (item['id'] == orderId) {
+      return item;
+    }
+  }
+
+  return null;
 }
 
 class _SectionCard extends StatelessWidget {
@@ -286,28 +424,55 @@ class _InfoRow extends StatelessWidget {
   }
 }
 
-class _OrderStatusBadge extends StatelessWidget {
+class _StatusRow extends StatelessWidget {
+  final String label;
+  final Widget child;
+
+  const _StatusRow({required this.label, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class _PaymentStatusBadge extends StatelessWidget {
   final String status;
 
-  const _OrderStatusBadge({required this.status});
+  const _PaymentStatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     late final Color textColor;
+    late final String label;
 
-    if (status == 'Selesai') {
+    if (status == 'paid') {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-    } else if (status == 'Dikirim') {
-      backgroundColor = const Color(0xFFEAF4FF);
-      textColor = const Color(0xFF2F80ED);
-    } else if (status == 'Diproses Farmasi') {
+      label = 'Lunas';
+    } else if (status == 'pending') {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
+      label = 'Menunggu';
+    } else if (status == 'failed') {
+      backgroundColor = const Color(0xFFFEF2F2);
+      textColor = const Color(0xFFDC2626);
+      label = 'Gagal';
     } else {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
+      label = 'Belum Dibayar';
     }
 
     return Container(
@@ -317,7 +482,54 @@ class _OrderStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        status,
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: textColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _FulfillmentStatusBadge extends StatelessWidget {
+  final String status;
+
+  const _FulfillmentStatusBadge({required this.status});
+
+  @override
+  Widget build(BuildContext context) {
+    late final Color backgroundColor;
+    late final Color textColor;
+    late final String label;
+
+    if (status == 'completed') {
+      backgroundColor = const Color(0xFFE9FBF6);
+      textColor = const Color(0xFF20B486);
+      label = 'Selesai';
+    } else if (status == 'shipped') {
+      backgroundColor = const Color(0xFFEAF4FF);
+      textColor = const Color(0xFF2F80ED);
+      label = 'Dikirim';
+    } else if (status == 'processing') {
+      backgroundColor = const Color(0xFFFFF7ED);
+      textColor = const Color(0xFFEA580C);
+      label = 'Diproses Farmasi';
+    } else {
+      backgroundColor = const Color(0xFFFEF2F2);
+      textColor = const Color(0xFFDC2626);
+      label = 'Menunggu Pembayaran';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

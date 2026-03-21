@@ -259,3 +259,51 @@ Automatically mark a prescription as completed after the user successfully confi
 - Use local dummy state/provider for now
 - Make minimal, high-confidence changes only
 - Do not refactor unrelated files
+
+## New Goal
+
+Implement dummy status actions for pharmacy orders.
+
+## Pharmacy Order Status Flow
+
+- Menunggu Pembayaran -> Diproses Farmasi
+- Diproses Farmasi -> Dikirim
+- Dikirim -> Selesai
+- Selesai -> no further action
+
+## Requirements
+
+- Add provider logic to update pharmacy order status
+- Show the correct action button in pharmacy order detail based on current status
+- Update the status immediately in the UI after the action
+- Keep the current visual style
+- Make minimal, high-confidence changes only
+- Do not refactor unrelated files
+
+## New Goal
+
+Separate pharmacy order payment status from fulfillment status.
+
+## Requirements
+
+- Pharmacy orders must have two separate fields:
+  - paymentStatus
+  - fulfillmentStatus
+- Payment status values:
+  - unpaid
+  - pending
+  - paid
+  - failed
+- Fulfillment status values:
+  - waiting_payment
+  - processing
+  - shipped
+  - completed
+
+## UI Requirements
+
+- Show payment status and fulfillment status separately in pharmacy order detail
+- Keep the current visual style
+- Preserve current medicine redemption and pharmacy order flow
+- Make minimal, high-confidence changes only
+- Do not refactor unrelated files
