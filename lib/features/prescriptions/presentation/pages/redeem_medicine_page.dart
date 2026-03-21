@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/pharmacy_order.dart';
+import '../../models/pharmacy_order_item.dart';
 import '../../models/prescription.dart';
 import '../../models/prescription_medicine.dart';
+import '../../models/shipping_address.dart';
 import '../../providers/pharmacy_order_provider.dart';
 import '../../providers/prescription_provider.dart';
 
@@ -31,17 +34,14 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
     final medicines = _buildPricedMedicines(
       currentPrescription.medicines,
     );
-    final subtotal = medicines.fold<int>(
-      0,
-      (sum, item) => sum + (item['price'] as int? ?? 0),
-    );
+    final subtotal = medicines.fold<int>(0, (sum, item) => sum + item.price);
     final shippingCost = selectedDeliveryMethod == 'Same Day' ? 18000 : 9000;
     final total = subtotal + shippingCost;
-    const shippingAddress = {
-      'recipient': 'Alwan Maulana',
-      'phone': '0812-3456-7890',
-      'address': 'Jl. Melati No. 18, Cempaka Putih, Jakarta Pusat',
-    };
+    const shippingAddress = ShippingAddress(
+      recipient: 'Alwan Maulana',
+      phone: '0812-3456-7890',
+      address: 'Jl. Melati No. 18, Cempaka Putih, Jakarta Pusat',
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Tebus Obat'), centerTitle: false),
@@ -56,22 +56,23 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                   ? () {
                       final orderId = DateTime.now().millisecondsSinceEpoch
                           .toString();
-                      final order = {
-                        'id': orderId,
-                        'prescriptionId': prescriptionId,
-                        'orderNumber': _buildOrderNumber(orderId),
-                        'orderDate': _buildOrderDate(),
-                        'paymentStatus': 'unpaid',
-                        'fulfillmentStatus': 'waiting_payment',
-                        'doctorName': currentPrescription.doctorName,
-                        'prescriptionDate': currentPrescription.date,
-                        'deliveryMethod': selectedDeliveryMethod,
-                        'shippingAddress': shippingAddress,
-                        'medicines': medicines,
-                        'subtotal': subtotal,
-                        'shippingCost': shippingCost,
-                        'total': total,
-                      };
+                      final order = PharmacyOrder(
+                        id: orderId,
+                        prescriptionId: prescriptionId,
+                        orderNumber: _buildOrderNumber(orderId),
+                        orderDate: _buildOrderDate(),
+                        paymentStatus: PharmacyOrder.paymentStatusUnpaid,
+                        fulfillmentStatus:
+                            PharmacyOrder.fulfillmentStatusWaitingPayment,
+                        doctorName: currentPrescription.doctorName,
+                        prescriptionDate: currentPrescription.date,
+                        deliveryMethod: selectedDeliveryMethod,
+                        shippingAddress: shippingAddress,
+                        medicines: medicines,
+                        subtotal: subtotal,
+                        shippingCost: shippingCost,
+                        total: total,
+                      );
 
                       ref.read(pharmacyOrdersProvider.notifier).addOrder(order);
                       ref
@@ -121,7 +122,7 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          medicine['name'] as String? ?? '-',
+                          medicine.name,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -131,19 +132,17 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
                         const SizedBox(height: 8),
                         _InfoRow(
                           label: 'Dosis',
-                          value: medicine['dosage'] as String? ?? '-',
+                          value: medicine.dosage,
                         ),
                         const SizedBox(height: 6),
                         _InfoRow(
                           label: 'Frekuensi',
-                          value: medicine['frequency'] as String? ?? '-',
+                          value: medicine.frequency,
                         ),
                         const SizedBox(height: 6),
                         _InfoRow(
                           label: 'Harga',
-                          value: _formatCurrency(
-                            medicine['price'] as int? ?? 0,
-                          ),
+                          value: _formatCurrency(medicine.price),
                         ),
                       ],
                     ),
@@ -259,16 +258,18 @@ class _RedeemMedicinePageState extends ConsumerState<RedeemMedicinePage> {
     );
   }
 
-  List<Map<String, dynamic>> _buildPricedMedicines(
+  List<PharmacyOrderItem> _buildPricedMedicines(
     List<PrescriptionMedicine> medicines,
   ) {
     const prices = [25000, 18000, 32000, 22000];
 
     return medicines.asMap().entries.map((entry) {
-      return {
-        ...entry.value.toMap(),
-        'price': prices[entry.key % prices.length],
-      };
+      return PharmacyOrderItem(
+        name: entry.value.name,
+        dosage: entry.value.dosage,
+        frequency: entry.value.frequency,
+        price: prices[entry.key % prices.length],
+      );
     }).toList();
   }
 

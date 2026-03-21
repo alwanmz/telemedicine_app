@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../models/pharmacy_order.dart';
 import '../../providers/pharmacy_order_provider.dart';
 
 class PharmacyOrdersPage extends ConsumerWidget {
@@ -18,11 +19,9 @@ class PharmacyOrdersPage extends ConsumerWidget {
           : ListView.separated(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
               itemCount: orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              separatorBuilder: (_, _) => const SizedBox(height: 14),
               itemBuilder: (context, index) {
                 final order = orders[index];
-                final fulfillmentStatus =
-                    order['fulfillmentStatus'] as String? ?? 'waiting_payment';
 
                 return InkWell(
                   borderRadius: BorderRadius.circular(24),
@@ -65,7 +64,7 @@ class PharmacyOrdersPage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                order['orderNumber'] as String? ?? '-',
+                                order.orderNumber,
                                 style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -74,7 +73,7 @@ class PharmacyOrdersPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                order['orderDate'] as String? ?? '-',
+                                order.orderDate,
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF6B7280),
@@ -82,7 +81,7 @@ class PharmacyOrdersPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 10),
                               Text(
-                                _formatCurrency(order['total'] as int? ?? 0),
+                                _formatCurrency(order.total),
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
@@ -91,7 +90,7 @@ class PharmacyOrdersPage extends ConsumerWidget {
                               ),
                               const SizedBox(height: 12),
                               _FulfillmentStatusBadge(
-                                status: fulfillmentStatus,
+                                status: order.fulfillmentStatus,
                               ),
                             ],
                           ),
@@ -182,24 +181,18 @@ class _FulfillmentStatusBadge extends StatelessWidget {
     late final Color backgroundColor;
     late final Color textColor;
 
-    late final String label;
-
-    if (status == 'completed') {
+    if (status == PharmacyOrder.fulfillmentStatusCompleted) {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-      label = 'Selesai';
-    } else if (status == 'shipped') {
+    } else if (status == PharmacyOrder.fulfillmentStatusShipped) {
       backgroundColor = const Color(0xFFEAF4FF);
       textColor = const Color(0xFF2F80ED);
-      label = 'Dikirim';
-    } else if (status == 'processing') {
+    } else if (status == PharmacyOrder.fulfillmentStatusProcessing) {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
-      label = 'Diproses Farmasi';
     } else {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
-      label = 'Menunggu Pembayaran';
     }
 
     return Container(
@@ -209,7 +202,7 @@ class _FulfillmentStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        label,
+        PharmacyOrder.labelForFulfillmentStatus(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

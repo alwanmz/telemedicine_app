@@ -1,38 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../models/pharmacy_order.dart';
 import '../../providers/pharmacy_order_provider.dart';
 
 class PharmacyOrderDetailPage extends ConsumerWidget {
-  final Map<String, dynamic> order;
+  final PharmacyOrder order;
 
   const PharmacyOrderDetailPage({super.key, required this.order});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final orderId = order['id'] as String?;
+    final orderId = order.id;
     final orders = ref.watch(pharmacyOrdersProvider);
     final currentOrder = _findOrder(orders, orderId) ?? order;
-    final orderNumber = currentOrder['orderNumber'] as String? ?? '-';
-    final paymentStatus =
-        currentOrder['paymentStatus'] as String? ?? 'unpaid';
-    final fulfillmentStatus =
-        currentOrder['fulfillmentStatus'] as String? ?? 'waiting_payment';
-    final doctorName = currentOrder['doctorName'] as String? ?? '-';
-    final prescriptionDate = currentOrder['prescriptionDate'] as String? ?? '-';
-    final deliveryMethod = currentOrder['deliveryMethod'] as String? ?? '-';
-    final shippingAddress =
-        currentOrder['shippingAddress'] as Map<String, dynamic>? ?? const {};
-    final medicines =
-        (currentOrder['medicines'] as List<dynamic>? ?? [])
-            .cast<Map<String, dynamic>>();
+    final orderNumber = currentOrder.orderNumber;
+    final paymentStatus = currentOrder.paymentStatus;
+    final fulfillmentStatus = currentOrder.fulfillmentStatus;
+    final doctorName = currentOrder.doctorName;
+    final prescriptionDate = currentOrder.prescriptionDate;
+    final deliveryMethod = currentOrder.deliveryMethod;
+    final shippingAddress = currentOrder.shippingAddress;
+    final medicines = currentOrder.medicines;
     final actionLabel = _actionLabel(fulfillmentStatus);
     final nextStatus = _nextStatus(fulfillmentStatus);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Lacak Pesanan'), centerTitle: false),
       bottomNavigationBar:
-          orderId == null || actionLabel == null || nextStatus == null
+          actionLabel == null || nextStatus == null
           ? null
           : SafeArea(
               top: false,
@@ -44,12 +40,13 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                     onPressed: () {
                       final notifier = ref.read(pharmacyOrdersProvider.notifier);
 
-                      if (fulfillmentStatus == 'waiting_payment') {
-                        notifier.markOrderAsPaid(orderId!);
+                      if (fulfillmentStatus ==
+                          PharmacyOrder.fulfillmentStatusWaitingPayment) {
+                        notifier.markOrderAsPaid(orderId);
                       } else {
                         notifier.updateFulfillmentStatus(
-                          id: orderId!,
-                          fulfillmentStatus: nextStatus!,
+                          id: orderId,
+                          fulfillmentStatus: nextStatus,
                         );
                       }
 
@@ -68,7 +65,7 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                       ),
                     ),
                     child: Text(
-                      actionLabel!,
+                      actionLabel,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -229,7 +226,7 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          medicine['name'] as String? ?? '-',
+                          medicine.name,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
@@ -239,12 +236,12 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                         const SizedBox(height: 8),
                         _InfoRow(
                           label: 'Dosis',
-                          value: medicine['dosage'] as String? ?? '-',
+                          value: medicine.dosage,
                         ),
                         const SizedBox(height: 6),
                         _InfoRow(
                           label: 'Frekuensi',
-                          value: medicine['frequency'] as String? ?? '-',
+                          value: medicine.frequency,
                         ),
                       ],
                     ),
@@ -262,7 +259,7 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                 _InfoRow(label: 'Metode', value: deliveryMethod),
                 const SizedBox(height: 10),
                 Text(
-                  shippingAddress['recipient'] as String? ?? '-',
+                  shippingAddress.recipient,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -271,7 +268,7 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  shippingAddress['phone'] as String? ?? '-',
+                  shippingAddress.phone,
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF4B5563),
@@ -279,7 +276,7 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  shippingAddress['address'] as String? ?? '-',
+                  shippingAddress.address,
                   style: const TextStyle(
                     fontSize: 13,
                     height: 1.5,
@@ -295,62 +292,49 @@ class PharmacyOrderDetailPage extends ConsumerWidget {
   }
 
   static const List<String> _statuses = [
-    'waiting_payment',
-    'processing',
-    'shipped',
-    'completed',
+    PharmacyOrder.fulfillmentStatusWaitingPayment,
+    PharmacyOrder.fulfillmentStatusProcessing,
+    PharmacyOrder.fulfillmentStatusShipped,
+    PharmacyOrder.fulfillmentStatusCompleted,
   ];
 
   static String? _actionLabel(String status) {
-    if (status == 'waiting_payment') {
+    if (status == PharmacyOrder.fulfillmentStatusWaitingPayment) {
       return 'Tandai Dibayar';
     }
-    if (status == 'processing') {
+    if (status == PharmacyOrder.fulfillmentStatusProcessing) {
       return 'Tandai Dikirim';
     }
-    if (status == 'shipped') {
+    if (status == PharmacyOrder.fulfillmentStatusShipped) {
       return 'Tandai Selesai';
     }
     return null;
   }
 
   static String? _nextStatus(String status) {
-    if (status == 'waiting_payment') {
-      return 'processing';
+    if (status == PharmacyOrder.fulfillmentStatusWaitingPayment) {
+      return PharmacyOrder.fulfillmentStatusProcessing;
     }
-    if (status == 'processing') {
-      return 'shipped';
+    if (status == PharmacyOrder.fulfillmentStatusProcessing) {
+      return PharmacyOrder.fulfillmentStatusShipped;
     }
-    if (status == 'shipped') {
-      return 'completed';
+    if (status == PharmacyOrder.fulfillmentStatusShipped) {
+      return PharmacyOrder.fulfillmentStatusCompleted;
     }
     return null;
   }
 
   static String _fulfillmentStatusLabel(String status) {
-    if (status == 'completed') {
-      return 'Selesai';
-    }
-    if (status == 'shipped') {
-      return 'Dikirim';
-    }
-    if (status == 'processing') {
-      return 'Diproses Farmasi';
-    }
-    return 'Menunggu Pembayaran';
+    return PharmacyOrder.labelForFulfillmentStatus(status);
   }
 }
 
-Map<String, dynamic>? _findOrder(
-  List<Map<String, dynamic>> orders,
-  String? orderId,
+PharmacyOrder? _findOrder(
+  List<PharmacyOrder> orders,
+  String orderId,
 ) {
-  if (orderId == null) {
-    return null;
-  }
-
   for (final item in orders) {
-    if (item['id'] == orderId) {
+    if (item.id == orderId) {
       return item;
     }
   }
@@ -455,24 +439,19 @@ class _PaymentStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     late final Color textColor;
-    late final String label;
 
-    if (status == 'paid') {
+    if (status == PharmacyOrder.paymentStatusPaid) {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-      label = 'Lunas';
-    } else if (status == 'pending') {
+    } else if (status == PharmacyOrder.paymentStatusPending) {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
-      label = 'Menunggu';
-    } else if (status == 'failed') {
+    } else if (status == PharmacyOrder.paymentStatusFailed) {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
-      label = 'Gagal';
     } else {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
-      label = 'Belum Dibayar';
     }
 
     return Container(
@@ -482,7 +461,7 @@ class _PaymentStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        label,
+        PharmacyOrder.labelForPaymentStatus(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
@@ -502,24 +481,19 @@ class _FulfillmentStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     late final Color backgroundColor;
     late final Color textColor;
-    late final String label;
 
-    if (status == 'completed') {
+    if (status == PharmacyOrder.fulfillmentStatusCompleted) {
       backgroundColor = const Color(0xFFE9FBF6);
       textColor = const Color(0xFF20B486);
-      label = 'Selesai';
-    } else if (status == 'shipped') {
+    } else if (status == PharmacyOrder.fulfillmentStatusShipped) {
       backgroundColor = const Color(0xFFEAF4FF);
       textColor = const Color(0xFF2F80ED);
-      label = 'Dikirim';
-    } else if (status == 'processing') {
+    } else if (status == PharmacyOrder.fulfillmentStatusProcessing) {
       backgroundColor = const Color(0xFFFFF7ED);
       textColor = const Color(0xFFEA580C);
-      label = 'Diproses Farmasi';
     } else {
       backgroundColor = const Color(0xFFFEF2F2);
       textColor = const Color(0xFFDC2626);
-      label = 'Menunggu Pembayaran';
     }
 
     return Container(
@@ -529,7 +503,7 @@ class _FulfillmentStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
-        label,
+        PharmacyOrder.labelForFulfillmentStatus(status),
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,

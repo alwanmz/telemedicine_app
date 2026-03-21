@@ -11,6 +11,7 @@ import '../../features/doctors/presentation/pages/doctor_detail_page.dart';
 import '../../features/doctors/presentation/pages/doctors_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/booking/models/appointment.dart';
+import '../../features/prescriptions/models/pharmacy_order.dart';
 import '../../features/prescriptions/models/prescription.dart';
 import '../../features/prescriptions/presentation/pages/pharmacy_order_detail_page.dart';
 import '../../features/prescriptions/presentation/pages/pharmacy_orders_page.dart';
@@ -91,7 +92,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/pharmacy-order-detail',
       builder: (context, state) {
-        final order = state.extra as Map<String, dynamic>;
+        final order = state.extra as PharmacyOrder;
         return PharmacyOrderDetailPage(order: order);
       },
     ),

@@ -346,3 +346,24 @@ Refactor the prescription domain to be backend-ready.
 - Do not rewrite unrelated features
 - Preserve the existing prescription list, detail, and redeem medicine flow
 - Keep the project beginner-friendly
+
+## Phase 3 Scope
+
+Refactor the pharmacy order domain to be backend-ready.
+
+### Goals
+
+- Create a PharmacyOrder model
+- Create a PharmacyOrderItem model
+- Create a ShippingAddress model
+- Standardize pharmacy order payment status values
+- Standardize pharmacy order fulfillment status values
+- Reduce direct Map<String, dynamic> usage in pharmacy-order-related flow
+- Preserve current UI and current app behavior as much as possible
+
+### Rules
+
+- Keep the refactor incremental
+- Do not rewrite unrelated features
+- Preserve the existing redeem medicine, pharmacy order list, and pharmacy order detail flow
+- Keep the project beginner-friendly
